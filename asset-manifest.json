@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/quran-recitation/static/css/main.d5e3743d.css",
+    "main.js": "/quran-recitation/static/js/main.d52dbe1d.js",
+    "static/js/787.26d76619.chunk.js": "/quran-recitation/static/js/787.26d76619.chunk.js",
+    "service-worker.js": "/quran-recitation/service-worker.js",
+    "index.html": "/quran-recitation/index.html",
+    "main.d5e3743d.css.map": "/quran-recitation/static/css/main.d5e3743d.css.map",
+    "main.d52dbe1d.js.map": "/quran-recitation/static/js/main.d52dbe1d.js.map",
+    "787.26d76619.chunk.js.map": "/quran-recitation/static/js/787.26d76619.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.d5e3743d.css",
+    "static/js/main.d52dbe1d.js"
+  ]
+}
