@@ -1,6 +1,7 @@
 {
   "name": "quran-recitation",
   "version": "0.1.0",
+  "homepage": "https://muhammed-rahif.github.io/quran-recitation",
   "private": true,
   "dependencies": {
     "@chakra-ui/react": "^2.4.6",
@@ -15,6 +16,7 @@
     "@types/react-dom": "^18.0.0",
     "axios": "^1.2.2",
     "framer-motion": "^8.0.2",
+    "gh-pages": "^4.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.6.1",
@@ -38,7 +40,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy": "gh-pages -d build",
+    "predeploy": "yarn build"
   },
   "eslintConfig": {
     "extends": [
