@@ -10,10 +10,6 @@ function Home() {
   const toast = useToast();
 
   useEffect(() => {
-    console.log({ allChapters });
-  }, [allChapters]);
-
-  useEffect(() => {
     getAllChapters()
       .then(data => setAllChapters(data))
       .catch(err =>
