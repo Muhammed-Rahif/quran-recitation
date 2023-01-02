@@ -1,7 +1,7 @@
 {
   "name": "quran-recitation",
   "version": "0.1.0",
-  "homepage": "https://muhammed-rahif.github.io/quran-recitation",
+  "homepage": "https://muhammed-rahif.github.io/quran-recitation/",
   "private": true,
   "dependencies": {
     "@chakra-ui/react": "^2.4.6",

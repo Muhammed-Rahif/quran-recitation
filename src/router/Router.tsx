@@ -8,7 +8,7 @@ function Router() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<Layout />}>
+        <Route path="/quran-recitation" element={<Layout />}>
           <Route index element={<Home />} />
 
           {/* <Route path="*" element={<NoMatch />} /> */}
