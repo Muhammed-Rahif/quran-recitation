@@ -28,9 +28,9 @@ function HeaderCard() {
   return (
     <LinkBox pos="sticky" top={4} borderRadius="2xl" zIndex={60}>
       <Card
+        shadow={isScrolled ? "dark-lg" : "base"}
         pos="relative"
         bg="green.700"
-        variant="outline"
         my={isScrolled ? 1.5 : 4}
         borderRadius="2xl"
       >

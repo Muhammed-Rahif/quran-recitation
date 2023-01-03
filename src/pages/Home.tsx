@@ -4,14 +4,20 @@ import { getAllChapters } from "../helpers/api";
 import { QuranChapter } from "../types/QuranChapter";
 import { Button, Circle, Grid, Heading, Text, useToast, VStack } from "@chakra-ui/react";
 
+const INIT_ARR_LENGTH = 10;
+
 function Home() {
-  const [allChapters, setAllChapters] = useState<QuranChapter[]>();
+  const [allChapters, setAllChapters] = useState<QuranChapter[]>(
+    new Array(INIT_ARR_LENGTH).fill({} as QuranChapter)
+  );
 
   const toast = useToast();
 
   useEffect(() => {
     getAllChapters()
-      .then(data => setAllChapters(data))
+      .then(data => {
+        setAllChapters(data);
+      })
       .catch(err =>
         toast({
           title: "Ooops!",
@@ -36,15 +42,17 @@ function Home() {
         }}
         columnGap={2}
         rowGap={2}
+        pb={4}
       >
         {allChapters?.map(({ name_simple, id, revelation_place, verses_count }, index) => (
           <Button
-            justifyContent="start"
+            isLoading={allChapters.length === INIT_ARR_LENGTH}
+            justifyContent={allChapters.length === INIT_ARR_LENGTH ? "center" : "start"}
             w="100%"
             borderRadius="xl"
             colorScheme="gray"
             key={index}
-            py={3}
+            py={allChapters.length === INIT_ARR_LENGTH ? 0 : 3}
             h="auto"
           >
             <Circle size="34px" border="2px" borderColor="green.700" color="white">
