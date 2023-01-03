@@ -67,7 +67,7 @@ function HeaderCard() {
           right={4}
           w={!isScrolled ? 32 : 16}
           transform="translateY(-50%)"
-          src="/images/quran.png"
+          src="images/quran.png"
           alt=""
           zIndex={0}
           opacity={0.25}

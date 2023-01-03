@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { BrowserRouter } from "react-router-dom";
+import Footer from "../components/Footer/Footer";
 import Layout from "../layout/Layout";
 import Home from "../pages/Home";
 
@@ -14,6 +15,7 @@ function Router() {
           {/* <Route path="*" element={<NoMatch />} /> */}
         </Route>
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }
