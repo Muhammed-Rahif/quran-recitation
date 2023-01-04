@@ -46,7 +46,7 @@ function ViewChapter() {
         waveColor: "green",
         progressColor: "purple",
         barWidth: 3,
-        barRadius: 6,
+        barRadius: 3,
       });
 
       wavesurfer.load(recitationForChapter?.audio_file.audio_url);
