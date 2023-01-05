@@ -27,3 +27,16 @@ body {
 .font-reem-kufi {
   font-family: "Reem Kufi", sans-serif !important;
 }
+
+#wavesurfer-wrapper wave:first-child {
+  width: 100%;
+  scale: 4;
+}
+
+#wavesurfer-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+#wavesurfer-wrapper > *::-webkit-scrollbar {
+  display: none;
+}

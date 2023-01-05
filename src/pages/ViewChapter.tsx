@@ -17,7 +17,7 @@ function ViewChapter() {
 
   useEffect(() => {
     Promise.all([
-      getSurahAudio({ recitationId: 1, chapterNo: parseInt(chapterNo!) }),
+      getSurahAudio({ recitationId: 2, chapterNo: parseInt(chapterNo!) }),
       getChapterVerses({ chapterNo: parseInt(chapterNo!) }),
     ])
       .then(([recitationForChapter, chapterVerses]) => {
@@ -41,21 +41,51 @@ function ViewChapter() {
 
   useEffect(() => {
     if (recitationForChapter?.audio_file.audio_url) {
+      const wavesurferDivWrapper = document.getElementById("wavesurfer-wrapper")!;
+      wavesurferDivWrapper.innerHTML = "";
+
       const wavesurfer = WaveSurfer.create({
-        container: "#wavesurfer-wrapper",
+        container: wavesurferDivWrapper,
         waveColor: "green",
-        progressColor: "purple",
-        barWidth: 3,
-        barRadius: 3,
+        progressColor: "green",
+        barWidth: 2.5,
+        barRadius: 12,
+        barHeight: 1.5,
+        interact: false,
+        cursorWidth: 0,
+        mediaControls: true,
+        pixelRatio: 8,
+        responsive: true,
+        autoCenter: true,
+        hideScrollbar: true,
       });
 
       wavesurfer.load(recitationForChapter?.audio_file.audio_url);
+
+      wavesurfer.on("ready", e => wavesurfer.play());
+
+      wavesurfer.on("audioprocess", e => {
+        const progressPercentage = e / wavesurfer.getDuration();
+
+        wavesurferDivWrapper.scrollLeft =
+          wavesurferDivWrapper.scrollWidth * progressPercentage -
+          wavesurferDivWrapper.clientWidth * 0.5;
+      });
     }
   }, [recitationForChapter]);
 
   return (
     <Box>
-      <div id="wavesurfer-wrapper"></div>
+      <Box
+        id="wavesurfer-wrapper"
+        h="500px"
+        display="grid"
+        placeItems="center"
+        scale={5}
+        w="full"
+        overflowX="scroll"
+        overflowY="hidden"
+      ></Box>
     </Box>
   );
 }
