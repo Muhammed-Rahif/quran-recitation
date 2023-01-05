@@ -28,9 +28,10 @@ body {
   font-family: "Reem Kufi", sans-serif !important;
 }
 
-#wavesurfer-wrapper wave:first-child {
+#wavesurfer-wrapper > wave {
   width: 100%;
   scale: 4;
+  transform: translate(50%);
 }
 
 #wavesurfer-wrapper::-webkit-scrollbar {

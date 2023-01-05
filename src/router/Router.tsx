@@ -4,7 +4,6 @@ import { BrowserRouter } from "react-router-dom";
 import Footer from "../components/Footer/Footer";
 import Layout from "../layout/Layout";
 import Home from "../pages/Home";
-import ViewChapter from "../pages/ViewChapter";
 
 function Router() {
   return (

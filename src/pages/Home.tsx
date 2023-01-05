@@ -2,30 +2,17 @@ import { useEffect, useState } from "react";
 import HeaderCard from "../features/home/HeaderCard/HeaderCard";
 import { getAllChapters } from "../helpers/api";
 import { QuranChapter } from "../types/QuranChapter";
-import {
-  Button,
-  Circle,
-  Grid,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Text,
-  useToast,
-  VStack,
-} from "@chakra-ui/react";
-import ViewChapter from "./ViewChapter";
+import { Button, Circle, Grid, Heading, Text, useToast, VStack } from "@chakra-ui/react";
+import { useAtom } from "jotai";
+import { activeAudioDataState } from "../states/states";
+import ViewChapter from "../features/home/VIewChapter/ViewChapter";
 
 const INIT_ARR_LENGTH = 10;
 
 function Home() {
   const toast = useToast();
 
-  const [activeChapterNo, setActiveChapterNo] = useState<number | null>();
+  const [activeAudioState, setActiveAudioState] = useAtom(activeAudioDataState);
 
   const [allChapters, setAllChapters] = useState<QuranChapter[]>(
     new Array(INIT_ARR_LENGTH).fill({} as QuranChapter)
@@ -73,7 +60,7 @@ function Home() {
             key={index}
             py={allChapters.length === INIT_ARR_LENGTH ? 0 : 3}
             h="auto"
-            onClick={() => setActiveChapterNo(id)}
+            onClick={() => setActiveAudioState({ chapterNo: id })}
           >
             <Circle size="34px" border="2px" borderColor="green.700" color="white">
               <Text fontSize="xl">{id}</Text>
@@ -89,27 +76,7 @@ function Home() {
         ))}
       </Grid>
 
-      <Modal
-        onClose={() => setActiveChapterNo(null)}
-        size="full"
-        isOpen={typeof activeChapterNo === "number"}
-        colorScheme="green"
-      >
-        <ModalOverlay />
-
-        <ModalContent bgColor="#031b13">
-          {/* <ModalHeader>Modal Title</ModalHeader>*/}
-          <ModalCloseButton />
-
-          <ModalBody>
-            {activeChapterNo && <ViewChapter chapterNo={activeChapterNo!} />}
-          </ModalBody>
-
-          {/* <ModalFooter>
-            <Button onClick={() => setActiveChapterNo(null)}>Close</Button>
-          </ModalFooter> */}
-        </ModalContent>
-      </Modal>
+      <ViewChapter />
     </>
   );
 }
