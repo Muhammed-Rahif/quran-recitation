@@ -1,20 +1,24 @@
 import {
   Box,
+  Collapse,
+  Flex,
+  IconButton,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalOverlay,
+  Spacer,
   useToast,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChapterVerses } from "../../../types/ChapterVerses";
 import { getChapterVerses, getSurahAudio } from "../../../helpers/api";
 import WaveSurfer from "wavesurfer.js";
-import { SurahAudio } from "../../../types/SurahAudio";
 import { useAtom } from "jotai";
 import { activeAudioDataState } from "../../../states/states";
+import { BsChevronDown, BsChevronUp, BsCloudSleet } from "react-icons/bs";
+import { IoMdClose } from "react-icons/io";
 
 function ViewChapter() {
   const toast = useToast();
@@ -65,7 +69,11 @@ function ViewChapter() {
               wavesurferDivWrapper.clientWidth * 0.5;
           });
 
-          setActiveAudioState({ wavesurfer, chapterNo: activeAudioState?.chapterNo });
+          setActiveAudioState({
+            wavesurfer,
+            chapterNo: activeAudioState?.chapterNo,
+            expandedPlayer: true,
+          });
         })
         .catch(err => {
           toast({
@@ -88,29 +96,58 @@ function ViewChapter() {
 
   return (
     <Modal
+      scrollBehavior="inside"
       onClose={onModalClose}
-      size="6xl"
+      size="full"
       motionPreset="slideInBottom"
       isOpen={typeof activeAudioState?.chapterNo === "number"}
       colorScheme="green"
+      blockScrollOnMount={false}
     >
-      {/* <ModalOverlay /> */}
+      {/* <ModalOverlay  /> */}
 
-      <ModalContent bgColor="#031b13">
-        <ModalCloseButton zIndex="99999" />
-
-        <ModalBody>
+      <ModalContent
+        mx={activeAudioState?.expandedPlayer ? 0 : 4}
+        // maxHeight={"12rem"}
+        // h={activeAudioState?.expandedPlayer ? "full" : "12rem"}
+        maxH={"12rem"}
+        bgColor="#031b13"
+        p={0}
+        top={activeAudioState?.expandedPlayer ? 0 : "80vh"}
+      >
+        <ModalBody p={activeAudioState?.expandedPlayer ? 3 : 2.5}>
           <Box>
-            <Box
-              id="wavesurfer-wrapper"
-              h="500px"
-              display="grid"
-              placeItems="center"
-              scale={5}
-              w="full"
-              overflowX="scroll"
-              overflowY="hidden"
-            ></Box>
+            <Flex>
+              <IconButton
+                onClick={() =>
+                  setActiveAudioState({
+                    ...activeAudioState,
+                    expandedPlayer: !activeAudioState?.expandedPlayer,
+                  })
+                }
+                colorScheme="gray"
+                aria-label={"button"}
+              >
+                {activeAudioState?.expandedPlayer ? <BsChevronDown /> : <BsChevronUp />}
+              </IconButton>
+              <Spacer />
+              <IconButton onClick={onModalClose} colorScheme="gray" aria-label={"button"}>
+                <IoMdClose />
+              </IconButton>
+            </Flex>
+
+            <Collapse in={activeAudioState?.expandedPlayer}>
+              <Box
+                id="wavesurfer-wrapper"
+                h="500px"
+                display="grid"
+                placeItems="center"
+                scale={5}
+                w="full"
+                overflowX="scroll"
+                overflowY="hidden"
+              ></Box>
+            </Collapse>
           </Box>
         </ModalBody>
 

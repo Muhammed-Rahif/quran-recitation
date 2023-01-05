@@ -60,7 +60,7 @@ function Home() {
             key={index}
             py={allChapters.length === INIT_ARR_LENGTH ? 0 : 3}
             h="auto"
-            onClick={() => setActiveAudioState({ chapterNo: id })}
+            onClick={() => setActiveAudioState({ chapterNo: id, expandedPlayer: true })}
           >
             <Circle size="34px" border="2px" borderColor="green.700" color="white">
               <Text fontSize="xl">{id}</Text>
