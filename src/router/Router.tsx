@@ -12,7 +12,7 @@ function Router() {
       <Routes>
         <Route path="/quran-recitation" element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="/quran-recitation/:chapterNo" element={<ViewChapter />} />
+          {/* <Route path="/quran-recitation/:chapterNo" element={<ViewChapter />} /> */}
 
           {/* <Route path="*" element={<NoMatch />} /> */}
         </Route>

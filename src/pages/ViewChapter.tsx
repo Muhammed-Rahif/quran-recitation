@@ -1,15 +1,13 @@
 import { Box, useToast } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChapterVerses } from "../types/ChapterVerses";
-import { getChapterVerses, getRecitationForChapter, getSurahAudio } from "../helpers/api";
-import { ChapterRecitations } from "../types/ChapterRecitations";
+import { getChapterVerses, getSurahAudio } from "../helpers/api";
 import WaveSurfer from "wavesurfer.js";
 import { SurahAudio } from "../types/SurahAudio";
 
-function ViewChapter() {
+function ViewChapter({ chapterNo }: { chapterNo: number }) {
   const toast = useToast();
-  const { chapterNo } = useParams();
   const navigate = useNavigate();
 
   const [chapterVerses, setChapterVerses] = useState<ChapterVerses>();
@@ -17,10 +15,11 @@ function ViewChapter() {
 
   useEffect(() => {
     Promise.all([
-      getSurahAudio({ recitationId: 2, chapterNo: parseInt(chapterNo!) }),
-      getChapterVerses({ chapterNo: parseInt(chapterNo!) }),
+      getSurahAudio({ recitationId: 2, chapterNo: chapterNo }),
+      getChapterVerses({ chapterNo: chapterNo }),
     ])
       .then(([recitationForChapter, chapterVerses]) => {
+        console.log(recitationForChapter, chapterVerses);
         setChapterVerses(chapterVerses);
         setRecitationForChapter(recitationForChapter);
       })
@@ -62,7 +61,7 @@ function ViewChapter() {
 
       wavesurfer.load(recitationForChapter?.audio_file.audio_url);
 
-      wavesurfer.on("ready", e => wavesurfer.play());
+      wavesurfer.on("ready", () => wavesurfer.play());
 
       wavesurfer.on("audioprocess", e => {
         const progressPercentage = e / wavesurfer.getDuration();
