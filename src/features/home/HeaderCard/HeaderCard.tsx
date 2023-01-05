@@ -33,6 +33,7 @@ function HeaderCard() {
         bg="green.700"
         my={isScrolled ? 1.5 : 4}
         borderRadius="2xl"
+        zIndex={60}
       >
         <CardBody pos="relative" zIndex={1} py={isScrolled ? 2 : 3}>
           <Text mb={isScrolled ? 1 : 2} fontSize="xs">
@@ -42,7 +43,7 @@ function HeaderCard() {
           <Box my={isScrolled ? 1.5 : 3}>
             <Flex align="center">
               <Heading transition="font-size 500ms" size={isScrolled ? "md" : "xl"}>
-                <LinkOverlay as={Link} to="/">
+                <LinkOverlay as={Link} to="./">
                   Al-Fatihah
                 </LinkOverlay>
               </Heading>

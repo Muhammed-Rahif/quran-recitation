@@ -95,67 +95,50 @@ function ViewChapter() {
   }, [activeAudioState?.chapterNo]);
 
   return (
-    <Modal
-      scrollBehavior="inside"
-      onClose={onModalClose}
-      size="full"
-      motionPreset="slideInBottom"
-      isOpen={typeof activeAudioState?.chapterNo === "number"}
-      colorScheme="green"
-      blockScrollOnMount={false}
+    <Box
+      w="full"
+      h={typeof activeAudioState?.chapterNo === "number" ? "full" : 0}
+      opacity={typeof activeAudioState?.chapterNo === "number" ? 1 : 0}
+      pointerEvents={typeof activeAudioState?.chapterNo === "number" ? "auto" : "none"}
+      p={3}
+      bg="#031b13"
+      pos="fixed"
+      zIndex={90}
+      left={0}
+      top={0}
     >
-      {/* <ModalOverlay  /> */}
+      <Flex>
+        <IconButton
+          onClick={() =>
+            setActiveAudioState({
+              ...activeAudioState,
+              expandedPlayer: !activeAudioState?.expandedPlayer,
+            })
+          }
+          colorScheme="gray"
+          aria-label={"button"}
+        >
+          {activeAudioState?.expandedPlayer ? <BsChevronDown /> : <BsChevronUp />}
+        </IconButton>
+        <Spacer />
+        <IconButton onClick={onModalClose} colorScheme="gray" aria-label={"button"}>
+          <IoMdClose />
+        </IconButton>
+      </Flex>
 
-      <ModalContent
-        mx={activeAudioState?.expandedPlayer ? 0 : 4}
-        // maxHeight={"12rem"}
-        // h={activeAudioState?.expandedPlayer ? "full" : "12rem"}
-        maxH={"12rem"}
-        bgColor="#031b13"
-        p={0}
-        top={activeAudioState?.expandedPlayer ? 0 : "80vh"}
-      >
-        <ModalBody p={activeAudioState?.expandedPlayer ? 3 : 2.5}>
-          <Box>
-            <Flex>
-              <IconButton
-                onClick={() =>
-                  setActiveAudioState({
-                    ...activeAudioState,
-                    expandedPlayer: !activeAudioState?.expandedPlayer,
-                  })
-                }
-                colorScheme="gray"
-                aria-label={"button"}
-              >
-                {activeAudioState?.expandedPlayer ? <BsChevronDown /> : <BsChevronUp />}
-              </IconButton>
-              <Spacer />
-              <IconButton onClick={onModalClose} colorScheme="gray" aria-label={"button"}>
-                <IoMdClose />
-              </IconButton>
-            </Flex>
-
-            <Collapse in={activeAudioState?.expandedPlayer}>
-              <Box
-                id="wavesurfer-wrapper"
-                h="500px"
-                display="grid"
-                placeItems="center"
-                scale={5}
-                w="full"
-                overflowX="scroll"
-                overflowY="hidden"
-              ></Box>
-            </Collapse>
-          </Box>
-        </ModalBody>
-
-        {/* <ModalFooter>
-            <Button onClick={() => setActiveChapterNo(null)}>Close</Button>
-          </ModalFooter> */}
-      </ModalContent>
-    </Modal>
+      <Collapse in={activeAudioState?.expandedPlayer}>
+        <Box
+          id="wavesurfer-wrapper"
+          h="500px"
+          display="grid"
+          placeItems="center"
+          scale={5}
+          w="full"
+          overflowX="scroll"
+          overflowY="hidden"
+        ></Box>
+      </Collapse>
+    </Box>
   );
 }
 
