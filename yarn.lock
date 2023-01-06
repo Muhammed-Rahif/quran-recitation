@@ -2112,6 +2112,11 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
+"@foobar404/wave@^2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@foobar404/wave/-/wave-2.0.4.tgz#c9bc54c41b18642c6a4587851e28b8f858af98b0"
+  integrity sha512-FEyg37hDvQtrQVlFxbit7ov5e487BjsR32bZfJ4oAb5i+NnlbGaNyy6iYBZ8ocVHo8fgug+SL+mFdDTzqjvPww==
+
 "@humanwhocodes/config-array@^0.11.8":
   version "0.11.8"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.11.8.tgz#03595ac2075a4dc0f191cc2131de14fbd7d410b9"

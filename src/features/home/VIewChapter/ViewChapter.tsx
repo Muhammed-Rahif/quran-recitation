@@ -39,17 +39,19 @@ function ViewChapter() {
         .then(([recitationForChapter, chapterVerses]) => {
           const wavesurferDivWrapper = document.getElementById("wavesurfer-wrapper")!;
           wavesurferDivWrapper.innerHTML = "";
+          if (activeAudioState.wavesurfer) activeAudioState.wavesurfer.destroy();
 
           const wavesurfer = WaveSurfer.create({
             container: wavesurferDivWrapper,
             waveColor: "green",
             progressColor: "lightgreen",
-            cursorColor: "darkgreen",
-            barWidth: 2.5,
-            barRadius: 12,
-            barHeight: 1.5,
+            cursorColor: "whitesmoke",
+            barWidth: 12,
+            barRadius: 60,
+            height: 500,
+            barHeight: 2,
             interact: false,
-            cursorWidth: 0.2,
+            cursorWidth: 0.1,
             mediaControls: true,
             pixelRatio: 10,
             responsive: true,
@@ -65,8 +67,8 @@ function ViewChapter() {
             const progressPercentage = e / wavesurfer.getDuration();
 
             wavesurferDivWrapper.scrollLeft =
-              wavesurferDivWrapper.scrollWidth * progressPercentage -
-              wavesurferDivWrapper.clientWidth * 0.5;
+              wavesurferDivWrapper.scrollWidth * progressPercentage;
+            // - wavesurferDivWrapper.clientWidth * 0.05;
           });
 
           setActiveAudioState({
@@ -96,16 +98,20 @@ function ViewChapter() {
 
   return (
     <Box
-      w="full"
-      h={typeof activeAudioState?.chapterNo === "number" ? "full" : 0}
+      h={activeAudioState?.expandedPlayer ? "full" : "32"}
+      w={activeAudioState?.expandedPlayer ? "full" : "95%"}
+      m="auto"
       opacity={typeof activeAudioState?.chapterNo === "number" ? 1 : 0}
       pointerEvents={typeof activeAudioState?.chapterNo === "number" ? "auto" : "none"}
       p={3}
       bg="#031b13"
       pos="fixed"
       zIndex={90}
-      left={0}
-      top={0}
+      bottom={0}
+      transform="translateX(-50%)"
+      left="50%"
+      shadow="dark-lg"
+      transitionDuration="500ms"
     >
       <Flex>
         <IconButton
@@ -126,7 +132,7 @@ function ViewChapter() {
         </IconButton>
       </Flex>
 
-      <Collapse in={activeAudioState?.expandedPlayer}>
+      <Collapse animateOpacity in={activeAudioState?.expandedPlayer}>
         <Box
           id="wavesurfer-wrapper"
           h="500px"
