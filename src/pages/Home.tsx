@@ -2,7 +2,15 @@ import { useEffect, useState } from "react";
 import HeaderCard from "../features/home/HeaderCard/HeaderCard";
 import { getAllChapters } from "../helpers/api";
 import { QuranChapter } from "../types/QuranChapter";
-import { Button, Circle, Grid, Heading, Text, useToast, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  Circle,
+  Grid,
+  Heading,
+  Text,
+  useToast,
+  VStack,
+} from "@chakra-ui/react";
 import { useAtom } from "jotai";
 import { activeAudioDataState } from "../states/states";
 import ViewChapter from "../features/home/VIewChapter/ViewChapter";
@@ -11,7 +19,6 @@ const INIT_ARR_LENGTH = 10;
 
 function Home() {
   const toast = useToast();
-
   const [activeAudioState, setActiveAudioState] = useAtom(activeAudioDataState);
 
   const [allChapters, setAllChapters] = useState<QuranChapter[]>(
@@ -20,15 +27,17 @@ function Home() {
 
   useEffect(() => {
     getAllChapters()
-      .then(data => {
+      .then((data) => {
         setAllChapters(data);
       })
-      .catch(err =>
+      .catch((err) =>
         toast({
           title: "Ooops!",
           status: "error",
           isClosable: false,
-          description: `Error:- ${err.message ? err.message : JSON.stringify(err)}`,
+          description: `Error:- ${
+            err.message ? err.message : JSON.stringify(err)
+          }`,
           position: "bottom-left",
         })
       );
@@ -50,30 +59,48 @@ function Home() {
         rowGap={2}
         pb={4}
       >
-        {allChapters?.map(({ name_simple, id, revelation_place, verses_count }, index) => (
-          <Button
-            isLoading={allChapters.length === INIT_ARR_LENGTH}
-            justifyContent={allChapters.length === INIT_ARR_LENGTH ? "center" : "start"}
-            w="100%"
-            borderRadius="xl"
-            colorScheme="gray"
-            key={index}
-            py={allChapters.length === INIT_ARR_LENGTH ? 0 : 3}
-            h="auto"
-            onClick={() => setActiveAudioState({ chapterNo: id, expandedPlayer: true })}
-          >
-            <Circle size="34px" border="2px" borderColor="green.700" color="white">
-              <Text fontSize="xl">{id}</Text>
-            </Circle>
+        {allChapters?.map(
+          ({ name_simple, id, revelation_place, verses_count }, index) => (
+            <Button
+              isLoading={allChapters.length === INIT_ARR_LENGTH}
+              justifyContent={
+                allChapters.length === INIT_ARR_LENGTH ? "center" : "start"
+              }
+              w="100%"
+              borderRadius="xl"
+              colorScheme="gray"
+              key={index}
+              py={allChapters.length === INIT_ARR_LENGTH ? 0 : 3}
+              h="auto"
+              onClick={() =>
+                setActiveAudioState({
+                  chapterNo: id,
+                  expandedPlayer: activeAudioState?.expandedPlayer ?? true,
+                })
+              }
+            >
+              <Circle
+                size="34px"
+                border="2px"
+                borderColor="green.700"
+                color="white"
+              >
+                <Text fontSize="xl">{id}</Text>
+              </Circle>
 
-            <VStack mx={4} align="start">
-              <Heading size="sm">{name_simple}</Heading>
-              <Text fontSize="md" fontWeight="normal" textTransform="capitalize">
-                {revelation_place}, {verses_count} Ayahs
-              </Text>
-            </VStack>
-          </Button>
-        ))}
+              <VStack mx={4} align="start">
+                <Heading size="sm">{name_simple}</Heading>
+                <Text
+                  fontSize="md"
+                  fontWeight="normal"
+                  textTransform="capitalize"
+                >
+                  {revelation_place}, {verses_count} Ayahs
+                </Text>
+              </VStack>
+            </Button>
+          )
+        )}
       </Grid>
 
       <ViewChapter />
