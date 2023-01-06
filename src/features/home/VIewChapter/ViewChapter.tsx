@@ -11,7 +11,7 @@ import {
   Spacer,
   useToast,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getChapterVerses, getSurahAudio } from "../../../helpers/api";
 import WaveSurfer from "wavesurfer.js";
@@ -19,15 +19,18 @@ import { useAtom } from "jotai";
 import { activeAudioDataState } from "../../../states/states";
 import { BsChevronDown, BsChevronUp, BsCloudSleet } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
+import { SurahAudio } from "../../../types/SurahAudio";
+import ReactAudioPlayer from "react-audio-player";
 
 function ViewChapter() {
   const toast = useToast();
   const navigate = useNavigate();
   const [activeAudioState, setActiveAudioState] = useAtom(activeAudioDataState);
+  const [recitationForChapter, setRecitationForChapter] = useState<SurahAudio>();
+  const audioPlayerRef = useRef<ReactAudioPlayer | null>();
 
   const onModalClose = () => {
     setActiveAudioState(null);
-    activeAudioState?.wavesurfer?.destroy();
   };
 
   useEffect(() => {
@@ -37,45 +40,11 @@ function ViewChapter() {
         getChapterVerses({ chapterNo: activeAudioState?.chapterNo }),
       ])
         .then(([recitationForChapter, chapterVerses]) => {
-          const wavesurferDivWrapper = document.getElementById("wavesurfer-wrapper")!;
-          wavesurferDivWrapper.innerHTML = "";
-          if (activeAudioState.wavesurfer) activeAudioState.wavesurfer.destroy();
-
-          const wavesurfer = WaveSurfer.create({
-            container: wavesurferDivWrapper,
-            waveColor: "green",
-            progressColor: "lightgreen",
-            cursorColor: "whitesmoke",
-            barWidth: 12,
-            barRadius: 60,
-            height: 500,
-            barHeight: 2,
-            interact: false,
-            cursorWidth: 0.1,
-            mediaControls: true,
-            pixelRatio: 10,
-            responsive: true,
-            autoCenter: true,
-            hideScrollbar: true,
-          });
-
-          wavesurfer.load(recitationForChapter?.audio_file.audio_url);
-
-          wavesurfer.on("ready", () => wavesurfer.play());
-
-          wavesurfer.on("audioprocess", e => {
-            const progressPercentage = e / wavesurfer.getDuration();
-
-            wavesurferDivWrapper.scrollLeft =
-              wavesurferDivWrapper.scrollWidth * progressPercentage;
-            // - wavesurferDivWrapper.clientWidth * 0.05;
-          });
-
           setActiveAudioState({
-            wavesurfer,
             chapterNo: activeAudioState?.chapterNo,
             expandedPlayer: true,
           });
+          setRecitationForChapter(recitationForChapter);
         })
         .catch(err => {
           toast({
@@ -90,10 +59,6 @@ function ViewChapter() {
             navigate("/quran-recitation");
           }, 3000);
         });
-
-    return () => {
-      activeAudioState?.wavesurfer?.destroy();
-    };
   }, [activeAudioState?.chapterNo]);
 
   return (
@@ -133,17 +98,18 @@ function ViewChapter() {
       </Flex>
 
       <Collapse animateOpacity in={activeAudioState?.expandedPlayer}>
-        <Box
-          id="wavesurfer-wrapper"
-          h="500px"
-          display="grid"
-          placeItems="center"
-          scale={5}
-          w="full"
-          overflowX="scroll"
-          overflowY="hidden"
-        ></Box>
+        <Box h="500px"></Box>
       </Collapse>
+
+      <ReactAudioPlayer
+        src={recitationForChapter?.audio_file.audio_url}
+        autoPlay
+        controls
+        style={{ width: "100%" }}
+        ref={audioPlayer => {
+          audioPlayerRef.current = audioPlayer;
+        }}
+      />
     </Box>
   );
 }
