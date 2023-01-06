@@ -82,7 +82,14 @@ function ViewChapter() {
   return (
     <Box
       h={activeAudioState?.expandedPlayer ? "full" : "40"}
-      w={activeAudioState?.expandedPlayer ? "full" : "7xl"}
+      w={
+        activeAudioState?.expandedPlayer
+          ? "full"
+          : {
+              base: "xs",
+              xl: "7xl",
+            }
+      }
       opacity={typeof activeAudioState?.chapterNo === "number" ? 1 : 0}
       pointerEvents={
         typeof activeAudioState?.chapterNo === "number" ? "auto" : "none"
@@ -92,6 +99,7 @@ function ViewChapter() {
       pos="fixed"
       zIndex={90}
       bottom={activeAudioState?.expandedPlayer ? 0 : 5}
+      borderRadius={activeAudioState?.expandedPlayer ? "none" : "xl"}
       transform="translateX(-50%)"
       left="50%"
       shadow="dark-lg"
