@@ -2,6 +2,7 @@ import {
   Box,
   Collapse,
   Flex,
+  HStack,
   IconButton,
   Modal,
   ModalBody,
@@ -17,11 +18,17 @@ import { getChapterVerses, getSurahAudio } from "../../../helpers/api";
 import WaveSurfer from "wavesurfer.js";
 import { useAtom } from "jotai";
 import { activeAudioDataState } from "../../../states/states";
-import { BsChevronDown, BsChevronUp, BsCloudSleet } from "react-icons/bs";
+import {
+  BsChevronDown,
+  BsChevronUp,
+  BsPlayFill,
+  BsPauseFill,
+} from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { SurahAudio } from "../../../types/SurahAudio";
 import ReactAudioPlayer from "react-audio-player";
 import { Wave, AudioElement } from "@foobar404/wave";
+import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
 
 function ViewChapter() {
   const toast = useToast();
@@ -69,13 +76,26 @@ function ViewChapter() {
   }, [activeAudioState?.chapterNo]);
 
   useEffect(() => {
-    if (audioPlayerRef.current?.audioEl) {
+    if (audioPlayerRef.current?.audioEl.current) {
       const canvas = document.getElementById(
         "recitation-visulization-canvas"
       ) as HTMLCanvasElement;
+      const AudioContext = window.AudioContext;
+      const ctx = new AudioContext();
+      const src = ctx.createMediaElementSource(
+        audioPlayerRef.current?.audioEl.current
+      );
+      const analyser = ctx.createAnalyser();
+      src.connect(analyser);
+      analyser.connect(ctx.destination);
 
-      // let wave = new Wave(audioPlayerRef.current?.audioEl as any, canvas);
-      // wave.addAnimation(new wave.animations.Wave());
+      let wave = new Wave({ context: ctx, source: src }, canvas);
+      wave.addAnimation(
+        new wave.animations.Square({
+          count: 50,
+          diameter: 300,
+        })
+      );
     }
   }, [audioPlayerRef]);
 
@@ -87,6 +107,9 @@ function ViewChapter() {
           ? "full"
           : {
               base: "xs",
+              sm: "sm",
+              md: "xl",
+              lg: "2xl",
               xl: "7xl",
             }
       }
@@ -133,7 +156,13 @@ function ViewChapter() {
       </Flex>
 
       <Collapse animateOpacity in={activeAudioState?.expandedPlayer}>
-        <Box as="canvas" id="recitation-visulization-canvas" />
+        <Box
+          as="canvas"
+          w={300}
+          m="auto"
+          h={400}
+          id="recitation-visulization-canvas"
+        />
       </Collapse>
 
       <Box py={5}>
@@ -142,10 +171,39 @@ function ViewChapter() {
           autoPlay
           controls
           style={{ width: "100%" }}
-          ref={(audioPlayer) => {
-            audioPlayerRef.current = audioPlayer;
-          }}
+          ref={(audioPlayer) => (audioPlayerRef.current = audioPlayer)}
         />
+
+        <Flex justify="space-evenly">
+          <IconButton
+            aria-label="prev-button"
+            borderRadius="full"
+            colorScheme="gray"
+          >
+            <MdNavigateBefore />
+          </IconButton>
+
+          <IconButton
+            aria-label="play-button"
+            borderRadius="full"
+            colorScheme="green"
+            size="lg"
+          >
+            {audioPlayerRef.current?.audioEl.current?.paused ? (
+              <BsPauseFill size="26" />
+            ) : (
+              <BsPlayFill size="26" />
+            )}
+          </IconButton>
+
+          <IconButton
+            aria-label="next-button"
+            borderRadius="full"
+            colorScheme="gray"
+          >
+            <MdNavigateNext />
+          </IconButton>
+        </Flex>
       </Box>
     </Box>
   );
