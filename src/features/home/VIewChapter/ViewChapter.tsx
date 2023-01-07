@@ -219,7 +219,7 @@ function ViewChapter() {
               onPause={() => setIsAudioPlaying(false)}
             />
 
-            <Flex justify="space-evenly" wrap="wrap">
+            <Flex justify="space-evenly" wrap={{ base: "wrap", md: "nowrap" }}>
               <Box
                 w={60}
                 alignItems="center"
@@ -244,7 +244,7 @@ function ViewChapter() {
                 </Slider>
               </Box>
 
-              <HStack gap={{ base: 1, md: 3, lg: 3.5, xl: 4 }}>
+              <HStack gap={{ base: 1, md: 1, lg: 3.5, xl: 4 }}>
                 <IconButton
                   aria-label="prev-button"
                   borderRadius="full"
