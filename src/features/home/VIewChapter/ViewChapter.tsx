@@ -1,8 +1,11 @@
 import {
   Box,
+  Circle,
   Collapse,
   Flex,
+  HStack,
   IconButton,
+  Select,
   Slider,
   SliderFilledTrack,
   SliderThumb,
@@ -12,7 +15,11 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getChapterVerses, getSurahAudio } from "../../../helpers/api";
+import {
+  getAllRecitations,
+  getChapterVerses,
+  getSurahAudio,
+} from "../../../helpers/api";
 import { useAtom } from "jotai";
 import { activeAudioDataState } from "../../../states/states";
 import {
@@ -20,12 +27,14 @@ import {
   BsChevronUp,
   BsPlayFill,
   BsPauseFill,
+  BsVolumeUpFill,
 } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { SurahAudio } from "../../../types/SurahAudio";
 import ReactAudioPlayer from "react-audio-player";
-import { Wave, AudioElement } from "@foobar404/wave";
 import { MdNavigateNext, MdNavigateBefore, MdGraphicEq } from "react-icons/md";
+import { AllRecitations } from "../../../types/AllRecitations";
+import { TbPlayerTrackNext, TbPlayerTrackPrev } from "react-icons/tb";
 
 function ViewChapter() {
   const toast = useToast();
@@ -34,28 +43,51 @@ function ViewChapter() {
   const [recitationForChapter, setRecitationForChapter] =
     useState<SurahAudio>();
   const audioPlayerRef = useRef<ReactAudioPlayer | null>();
+  const [allRecitations, setAllRecitations] = useState<AllRecitations>();
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [audioVolume, setAudioVolume] = useState(0.6);
   const [playerPercentage, setPlayerPercentage] = useState(0);
+  const [reciterId, setReciterId] = useState(5);
 
   const onModalClose = () => {
     setActiveAudioState(null);
+  };
+
+  const onNextChapter = () => {
+    if (!activeAudioState?.chapterNo) return;
+    if (activeAudioState?.chapterNo >= 1 && activeAudioState?.chapterNo < 114)
+      setActiveAudioState({
+        ...activeAudioState,
+        chapterNo: activeAudioState.chapterNo + 1,
+      });
+  };
+
+  const onPrevChapter = () => {
+    if (!activeAudioState?.chapterNo) return;
+    if (activeAudioState?.chapterNo > 1 && activeAudioState?.chapterNo <= 114)
+      setActiveAudioState({
+        ...activeAudioState,
+        chapterNo: activeAudioState.chapterNo - 1,
+      });
   };
 
   useEffect(() => {
     if (typeof activeAudioState?.chapterNo === "number")
       Promise.all([
         getSurahAudio({
-          recitationId: 4,
+          recitationId: reciterId,
           chapterNo: activeAudioState?.chapterNo,
         }),
         getChapterVerses({ chapterNo: activeAudioState?.chapterNo }),
+        getAllRecitations(),
       ])
-        .then(([recitationForChapter, chapterVerses]) => {
+        .then(([recitationForChapter, chapterVerses, allRecitations]) => {
           setActiveAudioState({
             chapterNo: activeAudioState?.chapterNo,
             expandedPlayer: activeAudioState.expandedPlayer,
           });
           setRecitationForChapter(recitationForChapter);
+          setAllRecitations(allRecitations);
         })
         .catch((err) => {
           toast({
@@ -72,13 +104,13 @@ function ViewChapter() {
             navigate("/quran-recitation");
           }, 3000);
         });
-  }, [activeAudioState?.chapterNo]);
+  }, [activeAudioState?.chapterNo, reciterId]);
 
   return (
     <>
       {typeof activeAudioState?.chapterNo === "number" && (
         <Box
-          h={activeAudioState?.expandedPlayer ? "full" : "40"}
+          h={activeAudioState?.expandedPlayer ? "full" : { base: 52, md: 40 }}
           w={
             activeAudioState?.expandedPlayer
               ? "full"
@@ -115,6 +147,7 @@ function ViewChapter() {
               }
               colorScheme="gray"
               aria-label={"button"}
+              size="xs"
             >
               {activeAudioState?.expandedPlayer ? (
                 <BsChevronDown />
@@ -127,6 +160,7 @@ function ViewChapter() {
               onClick={onModalClose}
               colorScheme="gray"
               aria-label={"button"}
+              size="xs"
             >
               <IoMdClose />
             </IconButton>
@@ -144,6 +178,9 @@ function ViewChapter() {
 
           <Box py={5}>
             <Slider
+              focusThumbOnChange={false}
+              size="lg"
+              mb={3}
               value={playerPercentage}
               onChange={(value) => {
                 const audio = audioPlayerRef.current?.audioEl.current;
@@ -155,7 +192,7 @@ function ViewChapter() {
               <SliderTrack bg="red.100">
                 <SliderFilledTrack bg="green.600" />
               </SliderTrack>
-              <SliderThumb boxSize={5}>
+              <SliderThumb boxSize={6}>
                 <Box color="green.600" as={MdGraphicEq} />
               </SliderThumb>
             </Slider>
@@ -175,56 +212,126 @@ function ViewChapter() {
                 backgroundColor: "green",
                 borderRadius: "50px",
               }}
+              volume={audioVolume}
               ref={(audioPlayer) => (audioPlayerRef.current = audioPlayer)}
               crossOrigin="anonymous"
               onPlay={() => setIsAudioPlaying(true)}
               onPause={() => setIsAudioPlaying(false)}
-              onCanPlay={(e) => console.log(e)}
             />
 
-            <Flex justify="space-evenly">
-              <IconButton
-                aria-label="prev-button"
-                borderRadius="full"
-                colorScheme="gray"
-                onClick={() => {
-                  const audio = audioPlayerRef.current?.audioEl.current;
-                  if (!audio) return;
-                  audio.currentTime -= 5;
-                }}
+            <Flex justify="space-evenly" wrap={{ base: "wrap", md: "nowrap" }}>
+              <Box
+                w={60}
+                alignItems="center"
+                display={{ base: "none", md: "flex" }}
               >
-                <MdNavigateBefore />
-              </IconButton>
+                <Circle bg="green.600" size="7">
+                  <BsVolumeUpFill />
+                </Circle>
+                <Slider
+                  onChange={(value) => {
+                    setAudioVolume(value / 100);
+                  }}
+                  aria-label="audioplayer-volume-slider"
+                  value={audioVolume * 100}
+                >
+                  <SliderTrack bg="red.100">
+                    <SliderFilledTrack bg="green.600" />
+                  </SliderTrack>
+                  <SliderThumb boxSize={5}>
+                    <Box color="green.600" as={BsVolumeUpFill} />
+                  </SliderThumb>
+                </Slider>
+              </Box>
 
-              <IconButton
-                aria-label="play-button"
-                colorScheme="green"
-                size="lg"
-                onClick={() => {
-                  const audio = audioPlayerRef.current?.audioEl.current;
-                  isAudioPlaying ? audio?.pause() : audio?.play();
-                }}
-                isRound
+              <HStack gap={{ base: 1, md: 1, lg: 3.5, xl: 4 }}>
+                <IconButton
+                  aria-label="prev-button"
+                  borderRadius="full"
+                  colorScheme="gray"
+                  onClick={onPrevChapter}
+                >
+                  <TbPlayerTrackPrev />
+                </IconButton>
+
+                <IconButton
+                  aria-label="next-button"
+                  borderRadius="full"
+                  colorScheme="gray"
+                  onClick={() => {
+                    const audio = audioPlayerRef.current?.audioEl.current;
+                    if (!audio) return;
+                    audio.currentTime += 5;
+                  }}
+                >
+                  <MdNavigateBefore />
+                </IconButton>
+
+                <IconButton
+                  aria-label="play-button"
+                  colorScheme="green"
+                  size="lg"
+                  onClick={() => {
+                    const audio = audioPlayerRef.current?.audioEl.current;
+                    isAudioPlaying ? audio?.pause() : audio?.play();
+                  }}
+                  isRound
+                >
+                  {isAudioPlaying ? (
+                    <BsPauseFill size="26" />
+                  ) : (
+                    <BsPlayFill size="26" />
+                  )}
+                </IconButton>
+
+                <IconButton
+                  aria-label="next-button"
+                  borderRadius="full"
+                  colorScheme="gray"
+                  onClick={() => {
+                    const audio = audioPlayerRef.current?.audioEl.current;
+                    if (!audio) return;
+                    audio.currentTime += 5;
+                  }}
+                >
+                  <MdNavigateNext />
+                </IconButton>
+
+                <IconButton
+                  aria-label="next-button"
+                  borderRadius="full"
+                  colorScheme="gray"
+                  onClick={onNextChapter}
+                >
+                  <TbPlayerTrackNext />
+                </IconButton>
+              </HStack>
+
+              <Select
+                variant="filled"
+                placeholder={(() => {
+                  const currentRecitation = allRecitations?.recitations.filter(
+                    (recite) => recite.id == reciterId
+                  );
+
+                  if (currentRecitation)
+                    return currentRecitation[0].reciter_name;
+
+                  return "Reciter";
+                })()}
+                py={{ base: 2, md: 0 }}
+                w={{ base: 72, md: 60 }}
+                onChange={(e) => setReciterId(parseInt(e.target.value))}
+                defaultValue={reciterId}
               >
-                {isAudioPlaying ? (
-                  <BsPauseFill size="26" />
-                ) : (
-                  <BsPlayFill size="26" />
+                {allRecitations?.recitations.map(
+                  ({ reciter_name, id }, indx) => (
+                    <option value={id} key={indx}>
+                      {reciter_name}
+                    </option>
+                  )
                 )}
-              </IconButton>
-
-              <IconButton
-                aria-label="next-button"
-                borderRadius="full"
-                colorScheme="gray"
-                onClick={() => {
-                  const audio = audioPlayerRef.current?.audioEl.current;
-                  if (!audio) return;
-                  audio.currentTime += 5;
-                }}
-              >
-                <MdNavigateNext />
-              </IconButton>
+              </Select>
             </Flex>
           </Box>
         </Box>

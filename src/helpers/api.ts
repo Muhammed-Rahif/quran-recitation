@@ -1,4 +1,5 @@
 import { QuranApiInstance } from "../constants/api";
+import { AllRecitations } from "../types/AllRecitations";
 import { ChapterRecitations } from "../types/ChapterRecitations";
 import { ChapterVerses } from "../types/ChapterVerses";
 import { QuranChapter } from "../types/QuranChapter";
@@ -53,6 +54,16 @@ export function getSurahAudio({
 }): Promise<SurahAudio> {
   return new Promise((resolve, reject) => {
     QuranApiInstance.get(`/chapter_recitations/${recitationId}/${chapterNo}`)
+      .then(response => {
+        resolve(response.data);
+      })
+      .catch(reject);
+  });
+}
+
+export function getAllRecitations(): Promise<AllRecitations> {
+  return new Promise((resolve, reject) => {
+    QuranApiInstance.get(`/resources/recitations?language=en`)
       .then(response => {
         resolve(response.data);
       })
