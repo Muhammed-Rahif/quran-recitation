@@ -25,11 +25,11 @@ import {
   BsChevronUp,
   BsPlayFill,
   BsPauseFill,
+  BsVolumeUpFill,
 } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { SurahAudio } from "../../../types/SurahAudio";
 import ReactAudioPlayer from "react-audio-player";
-import { Wave, AudioElement } from "@foobar404/wave";
 import { MdNavigateNext, MdNavigateBefore, MdGraphicEq } from "react-icons/md";
 import { AllRecitations } from "../../../types/AllRecitations";
 
@@ -42,6 +42,7 @@ function ViewChapter() {
   const audioPlayerRef = useRef<ReactAudioPlayer | null>();
   const [allRecitations, setAllRecitations] = useState<AllRecitations>();
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [audioVolume, setAudioVolume] = useState(0.6);
   const [playerPercentage, setPlayerPercentage] = useState(0);
   const [reciterId, setReciterId] = useState(5);
 
@@ -125,6 +126,7 @@ function ViewChapter() {
               }
               colorScheme="gray"
               aria-label={"button"}
+              size="xs"
             >
               {activeAudioState?.expandedPlayer ? (
                 <BsChevronDown />
@@ -137,6 +139,7 @@ function ViewChapter() {
               onClick={onModalClose}
               colorScheme="gray"
               aria-label={"button"}
+              size="xs"
             >
               <IoMdClose />
             </IconButton>
@@ -154,6 +157,9 @@ function ViewChapter() {
 
           <Box py={5}>
             <Slider
+              focusThumbOnChange={false}
+              size="lg"
+              mb={3}
               value={playerPercentage}
               onChange={(value) => {
                 const audio = audioPlayerRef.current?.audioEl.current;
@@ -165,7 +171,7 @@ function ViewChapter() {
               <SliderTrack bg="red.100">
                 <SliderFilledTrack bg="green.600" />
               </SliderTrack>
-              <SliderThumb boxSize={5}>
+              <SliderThumb boxSize={6}>
                 <Box color="green.600" as={MdGraphicEq} />
               </SliderThumb>
             </Slider>
@@ -185,6 +191,7 @@ function ViewChapter() {
                 backgroundColor: "green",
                 borderRadius: "50px",
               }}
+              volume={audioVolume}
               ref={(audioPlayer) => (audioPlayerRef.current = audioPlayer)}
               crossOrigin="anonymous"
               onPlay={() => setIsAudioPlaying(true)}
@@ -193,7 +200,22 @@ function ViewChapter() {
             />
 
             <Flex justify="space-evenly">
-              <Box w={60} />
+              <Box w={60}>
+                <Slider
+                  onChange={(value) => {
+                    setAudioVolume(value / 100);
+                  }}
+                  aria-label="audioplayer-volume-slider"
+                  value={audioVolume * 100}
+                >
+                  <SliderTrack bg="red.100">
+                    <SliderFilledTrack bg="green.600" />
+                  </SliderTrack>
+                  <SliderThumb boxSize={5}>
+                    <Box color="green.600" as={BsVolumeUpFill} />
+                  </SliderThumb>
+                </Slider>
+              </Box>
 
               <IconButton
                 aria-label="prev-button"
@@ -240,7 +262,16 @@ function ViewChapter() {
 
               <Select
                 variant="filled"
-                placeholder="Reciter"
+                placeholder={(() => {
+                  const currentRecitation = allRecitations?.recitations.filter(
+                    (recite) => recite.id == reciterId
+                  );
+
+                  if (currentRecitation)
+                    return currentRecitation[0].reciter_name;
+
+                  return "Reciter";
+                })()}
                 w={60}
                 onChange={(e) => setReciterId(parseInt(e.target.value))}
                 defaultValue={reciterId}
