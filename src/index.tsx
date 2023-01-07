@@ -7,12 +7,16 @@ import reportWebVitals from "./reportWebVitals";
 import { ColorModeScript } from "@chakra-ui/react";
 import theme from "./constants/theme";
 
-const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+const root = ReactDOM.createRoot(
+  document.getElementById("root") as HTMLElement
+);
 root.render(
-  <React.StrictMode>
+  // <React.StrictMode>
+  <>
     <ColorModeScript initialColorMode={theme.config.initialColorMode} />
     <App />
-  </React.StrictMode>
+  </>
+  // {/* </React.StrictMode> */}
 );
 
 // If you want your app to work offline and load faster, you can change

@@ -2,20 +2,13 @@ import {
   Box,
   Collapse,
   Flex,
-  HStack,
   IconButton,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalOverlay,
   Spacer,
   useToast,
 } from "@chakra-ui/react";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getChapterVerses, getSurahAudio } from "../../../helpers/api";
-import WaveSurfer from "wavesurfer.js";
 import { useAtom } from "jotai";
 import { activeAudioDataState } from "../../../states/states";
 import {
@@ -37,6 +30,7 @@ function ViewChapter() {
   const [recitationForChapter, setRecitationForChapter] =
     useState<SurahAudio>();
   const audioPlayerRef = useRef<ReactAudioPlayer | null>();
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
   const onModalClose = () => {
     setActiveAudioState(null);
@@ -100,112 +94,123 @@ function ViewChapter() {
   }, [audioPlayerRef]);
 
   return (
-    <Box
-      h={activeAudioState?.expandedPlayer ? "full" : "40"}
-      w={
-        activeAudioState?.expandedPlayer
-          ? "full"
-          : {
-              base: "xs",
-              sm: "sm",
-              md: "xl",
-              lg: "2xl",
-              xl: "7xl",
-            }
-      }
-      opacity={typeof activeAudioState?.chapterNo === "number" ? 1 : 0}
-      pointerEvents={
-        typeof activeAudioState?.chapterNo === "number" ? "auto" : "none"
-      }
-      p={3}
-      bg="#031b13"
-      pos="fixed"
-      zIndex={90}
-      bottom={activeAudioState?.expandedPlayer ? 0 : 5}
-      borderRadius={activeAudioState?.expandedPlayer ? "none" : "xl"}
-      transform="translateX(-50%)"
-      left="50%"
-      shadow="dark-lg"
-      transitionDuration="500ms"
-    >
-      <Flex>
-        <IconButton
-          onClick={() =>
-            setActiveAudioState({
-              ...activeAudioState,
-              expandedPlayer: !activeAudioState?.expandedPlayer,
-            })
-          }
-          colorScheme="gray"
-          aria-label={"button"}
-        >
-          {activeAudioState?.expandedPlayer ? (
-            <BsChevronDown />
-          ) : (
-            <BsChevronUp />
-          )}
-        </IconButton>
-        <Spacer />
-        <IconButton
-          onClick={onModalClose}
-          colorScheme="gray"
-          aria-label={"button"}
-        >
-          <IoMdClose />
-        </IconButton>
-      </Flex>
-
-      <Collapse animateOpacity in={activeAudioState?.expandedPlayer}>
+    <>
+      {typeof activeAudioState?.chapterNo === "number" && (
         <Box
-          as="canvas"
-          w={300}
-          m="auto"
-          h={400}
-          id="recitation-visulization-canvas"
-        />
-      </Collapse>
+          h={activeAudioState?.expandedPlayer ? "full" : "40"}
+          w={
+            activeAudioState?.expandedPlayer
+              ? "full"
+              : {
+                  base: "xs",
+                  sm: "sm",
+                  md: "xl",
+                  lg: "2xl",
+                  xl: "7xl",
+                }
+          }
+          opacity={typeof activeAudioState?.chapterNo === "number" ? 1 : 0}
+          pointerEvents={
+            typeof activeAudioState?.chapterNo === "number" ? "auto" : "none"
+          }
+          p={3}
+          bg="#031b13"
+          pos="fixed"
+          zIndex={90}
+          bottom={activeAudioState?.expandedPlayer ? 0 : 5}
+          borderRadius={activeAudioState?.expandedPlayer ? "none" : "xl"}
+          transform="translateX(-50%)"
+          left="50%"
+          shadow="dark-lg"
+          transitionDuration="500ms"
+        >
+          <Flex>
+            <IconButton
+              onClick={() =>
+                setActiveAudioState({
+                  ...activeAudioState,
+                  expandedPlayer: !activeAudioState?.expandedPlayer,
+                })
+              }
+              colorScheme="gray"
+              aria-label={"button"}
+            >
+              {activeAudioState?.expandedPlayer ? (
+                <BsChevronDown />
+              ) : (
+                <BsChevronUp />
+              )}
+            </IconButton>
+            <Spacer />
+            <IconButton
+              onClick={onModalClose}
+              colorScheme="gray"
+              aria-label={"button"}
+            >
+              <IoMdClose />
+            </IconButton>
+          </Flex>
 
-      <Box py={5}>
-        <ReactAudioPlayer
-          src={recitationForChapter?.audio_file.audio_url}
-          autoPlay
-          controls
-          style={{ width: "100%" }}
-          ref={(audioPlayer) => (audioPlayerRef.current = audioPlayer)}
-        />
+          <Collapse animateOpacity in={activeAudioState?.expandedPlayer}>
+            <Box
+              as="canvas"
+              w={300}
+              m="auto"
+              h={400}
+              id="recitation-visulization-canvas"
+            />
+          </Collapse>
 
-        <Flex justify="space-evenly">
-          <IconButton
-            aria-label="prev-button"
-            borderRadius="full"
-            colorScheme="gray"
-          >
-            <MdNavigateBefore />
-          </IconButton>
+          <Box py={5}>
+            <ReactAudioPlayer
+              src={recitationForChapter?.audio_file.audio_url}
+              autoPlay
+              controls
+              style={{
+                width: "100%",
+                backgroundColor: "green",
+                borderRadius: "50px",
+              }}
+              ref={(audioPlayer) => (audioPlayerRef.current = audioPlayer)}
+              crossOrigin="anonymous"
+              onPlay={() => setIsAudioPlaying(true)}
+              onPause={() => setIsAudioPlaying(false)}
+            />
 
-          <IconButton
-            aria-label="play-button"
-            borderRadius="full"
-            colorScheme="green"
-            size="lg"
-          >
-            {audioPlayerRef.current?.audioEl.current?.paused ? (
-              <BsPauseFill size="26" />
-            ) : (
-              <BsPlayFill size="26" />
-            )}
-          </IconButton>
+            <Flex justify="space-evenly">
+              <IconButton
+                aria-label="prev-button"
+                borderRadius="full"
+                colorScheme="gray"
+              >
+                <MdNavigateBefore />
+              </IconButton>
 
-          <IconButton
-            aria-label="next-button"
-            borderRadius="full"
-            colorScheme="gray"
-          >
-            <MdNavigateNext />
-          </IconButton>
-        </Flex>
-      </Box>
-    </Box>
+              <IconButton
+                aria-label="play-button"
+                borderRadius="full"
+                colorScheme="green"
+                size="lg"
+              >
+                {isAudioPlaying ? (
+                  <BsPauseFill size="26" />
+                ) : (
+                  <BsPlayFill size="26" />
+                )}
+              </IconButton>
+
+              <IconButton
+                aria-label="next-button"
+                borderRadius="full"
+                colorScheme="gray"
+              >
+                <MdNavigateNext />
+              </IconButton>
+            </Flex>
+          </Box>
+        </Box>
+      )}
+    </>
   );
 }
 
