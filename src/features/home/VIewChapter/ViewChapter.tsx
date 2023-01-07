@@ -3,6 +3,10 @@ import {
   Collapse,
   Flex,
   IconButton,
+  Slider,
+  SliderFilledTrack,
+  SliderThumb,
+  SliderTrack,
   Spacer,
   useToast,
 } from "@chakra-ui/react";
@@ -21,7 +25,7 @@ import { IoMdClose } from "react-icons/io";
 import { SurahAudio } from "../../../types/SurahAudio";
 import ReactAudioPlayer from "react-audio-player";
 import { Wave, AudioElement } from "@foobar404/wave";
-import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
+import { MdNavigateNext, MdNavigateBefore, MdGraphicEq } from "react-icons/md";
 
 function ViewChapter() {
   const toast = useToast();
@@ -31,6 +35,7 @@ function ViewChapter() {
     useState<SurahAudio>();
   const audioPlayerRef = useRef<ReactAudioPlayer | null>();
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [playerPercentage, setPlayerPercentage] = useState(0);
 
   const onModalClose = () => {
     setActiveAudioState(null);
@@ -40,7 +45,7 @@ function ViewChapter() {
     if (typeof activeAudioState?.chapterNo === "number")
       Promise.all([
         getSurahAudio({
-          recitationId: 2,
+          recitationId: 4,
           chapterNo: activeAudioState?.chapterNo,
         }),
         getChapterVerses({ chapterNo: activeAudioState?.chapterNo }),
@@ -68,30 +73,6 @@ function ViewChapter() {
           }, 3000);
         });
   }, [activeAudioState?.chapterNo]);
-
-  useEffect(() => {
-    if (audioPlayerRef.current?.audioEl.current) {
-      const canvas = document.getElementById(
-        "recitation-visulization-canvas"
-      ) as HTMLCanvasElement;
-      const AudioContext = window.AudioContext;
-      const ctx = new AudioContext();
-      const src = ctx.createMediaElementSource(
-        audioPlayerRef.current?.audioEl.current
-      );
-      const analyser = ctx.createAnalyser();
-      src.connect(analyser);
-      analyser.connect(ctx.destination);
-
-      let wave = new Wave({ context: ctx, source: src }, canvas);
-      wave.addAnimation(
-        new wave.animations.Square({
-          count: 50,
-          diameter: 300,
-        })
-      );
-    }
-  }, [audioPlayerRef]);
 
   return (
     <>
@@ -152,20 +133,43 @@ function ViewChapter() {
           </Flex>
 
           <Collapse animateOpacity in={activeAudioState?.expandedPlayer}>
-            <Box
+            {/* <Box
               as="canvas"
-              w={300}
+              w="full"
               m="auto"
               h={400}
               id="recitation-visulization-canvas"
-            />
+            /> */}
           </Collapse>
 
           <Box py={5}>
+            <Slider
+              value={playerPercentage}
+              onChange={(value) => {
+                const audio = audioPlayerRef.current?.audioEl.current;
+                if (!audio) return;
+                audio.currentTime = audio.duration * (value / 100);
+              }}
+              aria-label="audioplayer-slider"
+            >
+              <SliderTrack bg="red.100">
+                <SliderFilledTrack bg="green.600" />
+              </SliderTrack>
+              <SliderThumb boxSize={5}>
+                <Box color="green.600" as={MdGraphicEq} />
+              </SliderThumb>
+            </Slider>
+
             <ReactAudioPlayer
               src={recitationForChapter?.audio_file.audio_url}
               autoPlay
-              controls
+              listenInterval={50}
+              onListen={() => {
+                const audio = audioPlayerRef.current?.audioEl.current;
+                if (!audio) return;
+                setPlayerPercentage((audio.currentTime / audio.duration) * 100);
+              }}
+              controls={false}
               style={{
                 width: "100%",
                 backgroundColor: "green",
@@ -175,6 +179,7 @@ function ViewChapter() {
               crossOrigin="anonymous"
               onPlay={() => setIsAudioPlaying(true)}
               onPause={() => setIsAudioPlaying(false)}
+              onCanPlay={(e) => console.log(e)}
             />
 
             <Flex justify="space-evenly">
@@ -182,19 +187,24 @@ function ViewChapter() {
                 aria-label="prev-button"
                 borderRadius="full"
                 colorScheme="gray"
+                onClick={() => {
+                  const audio = audioPlayerRef.current?.audioEl.current;
+                  if (!audio) return;
+                  audio.currentTime -= 5;
+                }}
               >
                 <MdNavigateBefore />
               </IconButton>
 
               <IconButton
                 aria-label="play-button"
-                borderRadius="full"
                 colorScheme="green"
                 size="lg"
                 onClick={() => {
                   const audio = audioPlayerRef.current?.audioEl.current;
                   isAudioPlaying ? audio?.pause() : audio?.play();
                 }}
+                isRound
               >
                 {isAudioPlaying ? (
                   <BsPauseFill size="26" />
@@ -207,6 +217,11 @@ function ViewChapter() {
                 aria-label="next-button"
                 borderRadius="full"
                 colorScheme="gray"
+                onClick={() => {
+                  const audio = audioPlayerRef.current?.audioEl.current;
+                  if (!audio) return;
+                  audio.currentTime += 5;
+                }}
               >
                 <MdNavigateNext />
               </IconButton>
