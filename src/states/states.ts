@@ -5,4 +5,4 @@ type ActiveAudioDataStateType = {
   expandedPlayer: boolean;
 } | null;
 
-export const activeAudioDataState = atom<ActiveAudioDataStateType>({ expandedPlayer: true });
+export const activeAudioDataState = atom<ActiveAudioDataStateType>({ expandedPlayer: false });
