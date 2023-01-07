@@ -191,6 +191,10 @@ function ViewChapter() {
                 borderRadius="full"
                 colorScheme="green"
                 size="lg"
+                onClick={() => {
+                  const audio = audioPlayerRef.current?.audioEl.current;
+                  isAudioPlaying ? audio?.pause() : audio?.play();
+                }}
               >
                 {isAudioPlaying ? (
                   <BsPauseFill size="26" />
