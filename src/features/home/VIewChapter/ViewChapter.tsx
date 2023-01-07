@@ -1,5 +1,6 @@
 import {
   Box,
+  Circle,
   Collapse,
   Flex,
   IconButton,
@@ -200,7 +201,10 @@ function ViewChapter() {
             />
 
             <Flex justify="space-evenly">
-              <Box w={60}>
+              <Box w={60} display="flex" alignItems="center">
+                <Circle bg="green.600" size="7">
+                  <BsVolumeUpFill />
+                </Circle>
                 <Slider
                   onChange={(value) => {
                     setAudioVolume(value / 100);
