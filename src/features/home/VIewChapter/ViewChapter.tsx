@@ -3,6 +3,7 @@ import {
   Collapse,
   Flex,
   IconButton,
+  Select,
   Slider,
   SliderFilledTrack,
   SliderThumb,
@@ -12,7 +13,11 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getChapterVerses, getSurahAudio } from "../../../helpers/api";
+import {
+  getAllRecitations,
+  getChapterVerses,
+  getSurahAudio,
+} from "../../../helpers/api";
 import { useAtom } from "jotai";
 import { activeAudioDataState } from "../../../states/states";
 import {
@@ -26,6 +31,7 @@ import { SurahAudio } from "../../../types/SurahAudio";
 import ReactAudioPlayer from "react-audio-player";
 import { Wave, AudioElement } from "@foobar404/wave";
 import { MdNavigateNext, MdNavigateBefore, MdGraphicEq } from "react-icons/md";
+import { AllRecitations } from "../../../types/AllRecitations";
 
 function ViewChapter() {
   const toast = useToast();
@@ -34,8 +40,10 @@ function ViewChapter() {
   const [recitationForChapter, setRecitationForChapter] =
     useState<SurahAudio>();
   const audioPlayerRef = useRef<ReactAudioPlayer | null>();
+  const [allRecitations, setAllRecitations] = useState<AllRecitations>();
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [playerPercentage, setPlayerPercentage] = useState(0);
+  const [reciterId, setReciterId] = useState(5);
 
   const onModalClose = () => {
     setActiveAudioState(null);
@@ -45,17 +53,19 @@ function ViewChapter() {
     if (typeof activeAudioState?.chapterNo === "number")
       Promise.all([
         getSurahAudio({
-          recitationId: 4,
+          recitationId: reciterId,
           chapterNo: activeAudioState?.chapterNo,
         }),
         getChapterVerses({ chapterNo: activeAudioState?.chapterNo }),
+        getAllRecitations(),
       ])
-        .then(([recitationForChapter, chapterVerses]) => {
+        .then(([recitationForChapter, chapterVerses, allRecitations]) => {
           setActiveAudioState({
             chapterNo: activeAudioState?.chapterNo,
             expandedPlayer: activeAudioState.expandedPlayer,
           });
           setRecitationForChapter(recitationForChapter);
+          setAllRecitations(allRecitations);
         })
         .catch((err) => {
           toast({
@@ -72,7 +82,7 @@ function ViewChapter() {
             navigate("/quran-recitation");
           }, 3000);
         });
-  }, [activeAudioState?.chapterNo]);
+  }, [activeAudioState?.chapterNo, reciterId]);
 
   return (
     <>
@@ -183,6 +193,8 @@ function ViewChapter() {
             />
 
             <Flex justify="space-evenly">
+              <Box w={60} />
+
               <IconButton
                 aria-label="prev-button"
                 borderRadius="full"
@@ -225,6 +237,20 @@ function ViewChapter() {
               >
                 <MdNavigateNext />
               </IconButton>
+
+              <Select
+                variant="filled"
+                placeholder="Reciter"
+                w={60}
+                onChange={(e) => setReciterId(parseInt(e.target.value))}
+                defaultValue={reciterId}
+              >
+                {allRecitations?.recitations.map(
+                  ({ reciter_name, id }, indx) => (
+                    <option value={id}>{reciter_name}</option>
+                  )
+                )}
+              </Select>
             </Flex>
           </Box>
         </Box>
