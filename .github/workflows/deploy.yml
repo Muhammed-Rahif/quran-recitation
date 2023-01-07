@@ -6,6 +6,7 @@ jobs:
     steps:
       - name: Deploy with gh-pages
         run: |
+          ls
           git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
           yarn gh-pages -d build -u "github-actions-bot <support+actions@github.com>"
         env:
