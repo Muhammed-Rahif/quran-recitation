@@ -1,4 +1,4 @@
-name: learn-github-actions
+name: Deploy main branch
 on:
   workflow_dispatch:
   push:
