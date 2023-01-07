@@ -3,6 +3,7 @@ import {
   Circle,
   Collapse,
   Flex,
+  HStack,
   IconButton,
   Select,
   Slider,
@@ -33,6 +34,7 @@ import { SurahAudio } from "../../../types/SurahAudio";
 import ReactAudioPlayer from "react-audio-player";
 import { MdNavigateNext, MdNavigateBefore, MdGraphicEq } from "react-icons/md";
 import { AllRecitations } from "../../../types/AllRecitations";
+import { TbPlayerTrackNext, TbPlayerTrackPrev } from "react-icons/tb";
 
 function ViewChapter() {
   const toast = useToast();
@@ -49,6 +51,24 @@ function ViewChapter() {
 
   const onModalClose = () => {
     setActiveAudioState(null);
+  };
+
+  const onNextChapter = () => {
+    if (!activeAudioState?.chapterNo) return;
+    if (activeAudioState?.chapterNo >= 1 && activeAudioState?.chapterNo < 114)
+      setActiveAudioState({
+        ...activeAudioState,
+        chapterNo: activeAudioState.chapterNo + 1,
+      });
+  };
+
+  const onPrevChapter = () => {
+    if (!activeAudioState?.chapterNo) return;
+    if (activeAudioState?.chapterNo > 1 && activeAudioState?.chapterNo <= 114)
+      setActiveAudioState({
+        ...activeAudioState,
+        chapterNo: activeAudioState.chapterNo - 1,
+      });
   };
 
   useEffect(() => {
@@ -90,7 +110,7 @@ function ViewChapter() {
     <>
       {typeof activeAudioState?.chapterNo === "number" && (
         <Box
-          h={activeAudioState?.expandedPlayer ? "full" : "40"}
+          h={activeAudioState?.expandedPlayer ? "full" : { base: 52, md: 40 }}
           w={
             activeAudioState?.expandedPlayer
               ? "full"
@@ -197,11 +217,14 @@ function ViewChapter() {
               crossOrigin="anonymous"
               onPlay={() => setIsAudioPlaying(true)}
               onPause={() => setIsAudioPlaying(false)}
-              onCanPlay={(e) => console.log(e)}
             />
 
-            <Flex justify="space-evenly">
-              <Box w={60} display="flex" alignItems="center">
+            <Flex justify="space-evenly" wrap="wrap">
+              <Box
+                w={60}
+                alignItems="center"
+                display={{ base: "none", md: "flex" }}
+              >
                 <Circle bg="green.600" size="7">
                   <BsVolumeUpFill />
                 </Circle>
@@ -221,48 +244,68 @@ function ViewChapter() {
                 </Slider>
               </Box>
 
-              <IconButton
-                aria-label="prev-button"
-                borderRadius="full"
-                colorScheme="gray"
-                onClick={() => {
-                  const audio = audioPlayerRef.current?.audioEl.current;
-                  if (!audio) return;
-                  audio.currentTime -= 5;
-                }}
-              >
-                <MdNavigateBefore />
-              </IconButton>
+              <HStack gap={{ base: 1, md: 3, lg: 3.5, xl: 4 }}>
+                <IconButton
+                  aria-label="prev-button"
+                  borderRadius="full"
+                  colorScheme="gray"
+                  onClick={onPrevChapter}
+                >
+                  <TbPlayerTrackPrev />
+                </IconButton>
 
-              <IconButton
-                aria-label="play-button"
-                colorScheme="green"
-                size="lg"
-                onClick={() => {
-                  const audio = audioPlayerRef.current?.audioEl.current;
-                  isAudioPlaying ? audio?.pause() : audio?.play();
-                }}
-                isRound
-              >
-                {isAudioPlaying ? (
-                  <BsPauseFill size="26" />
-                ) : (
-                  <BsPlayFill size="26" />
-                )}
-              </IconButton>
+                <IconButton
+                  aria-label="next-button"
+                  borderRadius="full"
+                  colorScheme="gray"
+                  onClick={() => {
+                    const audio = audioPlayerRef.current?.audioEl.current;
+                    if (!audio) return;
+                    audio.currentTime += 5;
+                  }}
+                >
+                  <MdNavigateBefore />
+                </IconButton>
 
-              <IconButton
-                aria-label="next-button"
-                borderRadius="full"
-                colorScheme="gray"
-                onClick={() => {
-                  const audio = audioPlayerRef.current?.audioEl.current;
-                  if (!audio) return;
-                  audio.currentTime += 5;
-                }}
-              >
-                <MdNavigateNext />
-              </IconButton>
+                <IconButton
+                  aria-label="play-button"
+                  colorScheme="green"
+                  size="lg"
+                  onClick={() => {
+                    const audio = audioPlayerRef.current?.audioEl.current;
+                    isAudioPlaying ? audio?.pause() : audio?.play();
+                  }}
+                  isRound
+                >
+                  {isAudioPlaying ? (
+                    <BsPauseFill size="26" />
+                  ) : (
+                    <BsPlayFill size="26" />
+                  )}
+                </IconButton>
+
+                <IconButton
+                  aria-label="next-button"
+                  borderRadius="full"
+                  colorScheme="gray"
+                  onClick={() => {
+                    const audio = audioPlayerRef.current?.audioEl.current;
+                    if (!audio) return;
+                    audio.currentTime += 5;
+                  }}
+                >
+                  <MdNavigateNext />
+                </IconButton>
+
+                <IconButton
+                  aria-label="next-button"
+                  borderRadius="full"
+                  colorScheme="gray"
+                  onClick={onNextChapter}
+                >
+                  <TbPlayerTrackNext />
+                </IconButton>
+              </HStack>
 
               <Select
                 variant="filled"
@@ -276,13 +319,16 @@ function ViewChapter() {
 
                   return "Reciter";
                 })()}
-                w={60}
+                py={{ base: 2, md: 0 }}
+                w={{ base: 72, md: 60 }}
                 onChange={(e) => setReciterId(parseInt(e.target.value))}
                 defaultValue={reciterId}
               >
                 {allRecitations?.recitations.map(
                   ({ reciter_name, id }, indx) => (
-                    <option value={id}>{reciter_name}</option>
+                    <option value={id} key={indx}>
+                      {reciter_name}
+                    </option>
                   )
                 )}
               </Select>
