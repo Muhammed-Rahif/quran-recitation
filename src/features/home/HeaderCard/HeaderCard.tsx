@@ -10,6 +10,7 @@ import {
   Image,
   LinkBox,
   LinkOverlay,
+  Skeleton,
   Spacer,
   Text,
   useToast,
@@ -25,9 +26,10 @@ function HeaderCard() {
   const toast = useToast();
   const [lastReadChapter, setLastReadChapter] = useState<QuranChapter>();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [lastReadChapterId, setLastReadChapterId] = useLocalStorage<
-    number | null
-  >("last-read-chapter", null);
+  const [lastReadChapterId, setLastReadChapterId] = useLocalStorage<number>(
+    "last-read-chapter",
+    1
+  );
   const [activeAudioState, setActiveAudioState] = useAtom(activeAudioDataState);
 
   useEffect(() => {
@@ -43,7 +45,6 @@ function HeaderCard() {
   }, [activeAudioState?.chapterNo]);
 
   useEffect(() => {
-    if (!lastReadChapterId) return;
     getChapter(lastReadChapterId)
       .then(setLastReadChapter)
       .catch((err) =>
@@ -73,60 +74,72 @@ function HeaderCard() {
           });
       }}
     >
-      <Card
+      <Skeleton
         shadow={isScrolled ? "dark-lg" : "base"}
         pos="relative"
-        bg="green.700"
+        startColor="green.400"
+        endColor="green.900"
         my={isScrolled ? 1.5 : 4}
         borderRadius="2xl"
         zIndex={60}
+        opacity={0.98}
+        isLoaded={typeof lastReadChapter !== "undefined"}
       >
-        <CardBody pos="relative" zIndex={1} py={isScrolled ? 2 : 3}>
-          <Text mb={isScrolled ? 1 : 2} fontSize="xs">
-            Last Read
-          </Text>
+        <Card
+          shadow={isScrolled ? "dark-lg" : "base"}
+          pos="relative"
+          bg="green.700"
+          my={isScrolled ? 1.5 : 4}
+          borderRadius="2xl"
+          zIndex={60}
+        >
+          <CardBody pos="relative" zIndex={1} py={isScrolled ? 2 : 3}>
+            <Text mb={isScrolled ? 1 : 2} fontSize="xs">
+              Last Read
+            </Text>
 
-          <Box my={isScrolled ? 1.5 : 3}>
-            <Flex align="center">
-              <Heading
-                transition="font-size 500ms"
-                size={isScrolled ? "md" : "xl"}
-              >
-                <LinkOverlay as={Link} to="./">
-                  {lastReadChapter?.name_simple}
-                </LinkOverlay>
-              </Heading>
-              <Spacer />
-              <Text textTransform="capitalize" fontSize="xs">
-                {lastReadChapter?.revelation_place}
-              </Text>
-            </Flex>
+            <Box my={isScrolled ? 1.5 : 3}>
+              <Flex align="center">
+                <Heading
+                  transition="font-size 500ms"
+                  size={isScrolled ? "md" : "xl"}
+                >
+                  <LinkOverlay as={Link} to="./">
+                    {lastReadChapter?.name_simple}
+                  </LinkOverlay>
+                </Heading>
+                <Spacer />
+                <Text textTransform="capitalize" fontSize="xs">
+                  {lastReadChapter?.revelation_place}
+                </Text>
+              </Flex>
+
+              <Collapse in={!isScrolled} animateOpacity>
+                <Text>{lastReadChapter?.translated_name?.name}</Text>
+                <Divider my={1.5} />
+              </Collapse>
+            </Box>
 
             <Collapse in={!isScrolled} animateOpacity>
-              <Text>{lastReadChapter?.translated_name?.name}</Text>
-              <Divider my={1.5} />
+              <Text fontSize="sm">{lastReadChapter?.name_complex}</Text>
+              {/* Ayah No: 7*/}
             </Collapse>
-          </Box>
+          </CardBody>
 
-          <Collapse in={!isScrolled} animateOpacity>
-            <Text fontSize="sm">{lastReadChapter?.name_complex}</Text>
-            {/* Ayah No: 7*/}
-          </Collapse>
-        </CardBody>
-
-        <Image
-          pos="absolute"
-          top="60%"
-          right={4}
-          w={!isScrolled ? 32 : 16}
-          transform="translateY(-50%)"
-          src="images/quran.png"
-          alt=""
-          zIndex={0}
-          opacity={0.25}
-          transition="width 500ms"
-        />
-      </Card>
+          <Image
+            pos="absolute"
+            top="60%"
+            right={4}
+            w={!isScrolled ? 32 : 16}
+            transform="translateY(-50%)"
+            src="images/quran.png"
+            alt=""
+            zIndex={0}
+            opacity={0.25}
+            transition="width 500ms"
+          />
+        </Card>
+      </Skeleton>
     </LinkBox>
   );
 }
