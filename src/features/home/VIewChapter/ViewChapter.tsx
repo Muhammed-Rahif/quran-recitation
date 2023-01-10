@@ -45,7 +45,7 @@ function ViewChapter() {
   const audioPlayerRef = useRef<ReactAudioPlayer | null>();
   const [allRecitations, setAllRecitations] = useState<AllRecitations>();
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const [audioVolume, setAudioVolume] = useState(0.6);
+  const [audioVolume, setAudioVolume] = useState(1);
   const [playerPercentage, setPlayerPercentage] = useState(0);
   const [reciterId, setReciterId] = useState(5);
 
@@ -180,7 +180,6 @@ function ViewChapter() {
             <Slider
               focusThumbOnChange={false}
               size="lg"
-              mb={3}
               value={playerPercentage}
               onChange={(value) => {
                 const audio = audioPlayerRef.current?.audioEl.current;
@@ -192,7 +191,7 @@ function ViewChapter() {
               <SliderTrack bg="red.100">
                 <SliderFilledTrack bg="green.600" />
               </SliderTrack>
-              <SliderThumb boxSize={6}>
+              <SliderThumb boxSize={3}>
                 <Box color="green.600" as={MdGraphicEq} />
               </SliderThumb>
             </Slider>
@@ -219,11 +218,20 @@ function ViewChapter() {
               onPause={() => setIsAudioPlaying(false)}
             />
 
-            <Flex justify="space-evenly" wrap={{ base: "wrap", md: "nowrap" }}>
-              <Box
+            <Flex
+              flexDirection={{ base: "column-reverse", md: "row" }}
+              justify="space-evenly"
+              align="center"
+              wrap={{ base: "wrap", md: "nowrap" }}
+            >
+              <Box w={60} />
+              {/* <Box
                 w={60}
                 alignItems="center"
-                display={{ base: "none", md: "flex" }}
+                display={{
+                  base: activeAudioState.expandedPlayer ? "flex" : "none",
+                  md: "flex",
+                }}
               >
                 <Circle bg="green.600" size="7">
                   <BsVolumeUpFill />
@@ -242,9 +250,9 @@ function ViewChapter() {
                     <Box color="green.600" as={BsVolumeUpFill} />
                   </SliderThumb>
                 </Slider>
-              </Box>
+              </Box> */}
 
-              <HStack gap={{ base: 1, md: 1, lg: 3.5, xl: 4 }}>
+              <HStack mx={2} gap={{ base: 1, md: 1, lg: 3.5, xl: 4 }}>
                 <IconButton
                   aria-label="prev-button"
                   borderRadius="full"
@@ -320,9 +328,15 @@ function ViewChapter() {
                   return "Reciter";
                 })()}
                 py={{ base: 2, md: 0 }}
-                w={{ base: 72, md: 60 }}
+                w={{
+                  base: activeAudioState.expandedPlayer ? "full" : 72,
+                  md: 60,
+                }}
                 onChange={(e) => setReciterId(parseInt(e.target.value))}
                 defaultValue={reciterId}
+                my={1.5}
+                size={activeAudioState.expandedPlayer ? "md" : "sm"}
+                rounded="lg"
               >
                 {allRecitations?.recitations.map(
                   ({ reciter_name, id }, indx) => (
