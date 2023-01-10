@@ -12,21 +12,67 @@ import {
   LinkOverlay,
   Spacer,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
+import useLocalStorage from "use-local-storage";
+import { useAtom } from "jotai";
+import { activeAudioDataState } from "../../../states/states";
+import { getChapter } from "../../../helpers/api";
+import { QuranChapter } from "../../../types/QuranChapter";
 
 function HeaderCard() {
+  const toast = useToast();
+  const [lastReadChapter, setLastReadChapter] = useState<QuranChapter>();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [lastReadChapterId, setLastReadChapterId] = useLocalStorage<
+    number | null
+  >("last-read-chapter", null);
+  const [activeAudioState, setActiveAudioState] = useAtom(activeAudioDataState);
 
   useEffect(() => {
-    window.onscroll = e => {
+    window.onscroll = (e) => {
       if (window.scrollY !== 0) setIsScrolled(true);
       else setIsScrolled(false);
     };
   }, []);
 
+  useEffect(() => {
+    if (!activeAudioState?.chapterNo) return;
+    setLastReadChapterId(activeAudioState?.chapterNo);
+  }, [activeAudioState?.chapterNo]);
+
+  useEffect(() => {
+    if (!lastReadChapterId) return;
+    getChapter(lastReadChapterId)
+      .then(setLastReadChapter)
+      .catch((err) =>
+        toast({
+          title: "Ooops!",
+          status: "error",
+          isClosable: false,
+          description: `Error:- ${
+            err.message ? err.message : JSON.stringify(err)
+          }`,
+          position: "bottom-left",
+        })
+      );
+  }, []);
+
   return (
-    <LinkBox pos="sticky" top={4} borderRadius="2xl" zIndex={60}>
+    <LinkBox
+      pos="sticky"
+      top={4}
+      borderRadius="2xl"
+      zIndex={60}
+      onClick={() => {
+        if (lastReadChapterId)
+          setActiveAudioState({
+            ...activeAudioState!,
+            chapterNo: lastReadChapterId,
+          });
+      }}
+    >
       <Card
         shadow={isScrolled ? "dark-lg" : "base"}
         pos="relative"
@@ -42,23 +88,29 @@ function HeaderCard() {
 
           <Box my={isScrolled ? 1.5 : 3}>
             <Flex align="center">
-              <Heading transition="font-size 500ms" size={isScrolled ? "md" : "xl"}>
+              <Heading
+                transition="font-size 500ms"
+                size={isScrolled ? "md" : "xl"}
+              >
                 <LinkOverlay as={Link} to="./">
-                  Al-Fatihah
+                  {lastReadChapter?.name_simple}
                 </LinkOverlay>
               </Heading>
               <Spacer />
-              <Text fontSize="xs">Makkah</Text>
+              <Text textTransform="capitalize" fontSize="xs">
+                {lastReadChapter?.revelation_place}
+              </Text>
             </Flex>
 
             <Collapse in={!isScrolled} animateOpacity>
-              <Text>The Opener</Text>
+              <Text>{lastReadChapter?.translated_name?.name}</Text>
               <Divider my={1.5} />
             </Collapse>
           </Box>
 
           <Collapse in={!isScrolled} animateOpacity>
-            <Text fontSize="sm">Ayah No: 7</Text>
+            <Text fontSize="sm">{lastReadChapter?.name_complex}</Text>
+            {/* Ayah No: 7*/}
           </Collapse>
         </CardBody>
 

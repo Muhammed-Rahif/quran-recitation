@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 
-type ActiveAudioDataStateType = {
+ type ActiveAudioDataStateType = {
   chapterNo?: number;
   expandedPlayer: boolean;
 } | null;

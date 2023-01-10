@@ -70,3 +70,13 @@ export function getAllRecitations(): Promise<AllRecitations> {
       .catch(reject);
   });
 }
+
+export function getChapter(chapterId:number): Promise<QuranChapter> {
+  return new Promise((resolve, reject) => {
+    QuranApiInstance.get(`/chapters/${chapterId}?language=en`)
+      .then(response => {
+        resolve(response.data.chapter);
+      })
+      .catch(reject);
+  });
+}

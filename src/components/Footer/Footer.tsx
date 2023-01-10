@@ -13,7 +13,6 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import React from "react";
 import { RiInstagramFill, RiGithubFill, RiTwitterFill } from "react-icons/ri";
 import { SiGmail } from "react-icons/si";
 import { TbSend } from "react-icons/tb";
@@ -21,7 +20,11 @@ import { TbSend } from "react-icons/tb";
 const iconsBtns = [
   {
     icon: RiGithubFill,
-    onClick: () => window.open("https://github.com/Muhammed-Rahif/quran-recitation", "_blank"),
+    onClick: () =>
+      window.open(
+        "https://github.com/Muhammed-Rahif/quran-recitation",
+        "_blank"
+      ),
   },
   {
     icon: SiGmail,
@@ -29,7 +32,8 @@ const iconsBtns = [
   },
   {
     icon: RiInstagramFill,
-    onClick: () => window.open("https://instagram.com/muhammed_rahif_", "_blank"),
+    onClick: () =>
+      window.open("https://instagram.com/muhammed_rahif_", "_blank"),
   },
   {
     icon: RiTwitterFill,
@@ -50,7 +54,7 @@ function Footer() {
           sm: "repeat(2, 1fr)",
           md: "repeat(3, 1fr)",
           lg: "repeat(4, 1fr)",
-          "2xl":"repeat(5, 1fr)"
+          "2xl": "repeat(5, 1fr)",
         }}
         columnGap={6}
         rowGap={8}
@@ -102,8 +106,8 @@ function Footer() {
             <Box>
               <Textarea p={2.5} placeholder="Type here..." />
               <FormHelperText lineHeight="5">
-                Share your thoughts, suggestions and opinions with me. Also please consider
-                including me in your dua. Jazakallah khair...
+                Share your thoughts, suggestions and opinions with me. Also
+                please consider including me in your dua. Jazakallah khair...
               </FormHelperText>
             </Box>
             <Button
