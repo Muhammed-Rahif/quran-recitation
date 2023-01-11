@@ -11,6 +11,7 @@ import {
   SliderThumb,
   SliderTrack,
   Spacer,
+  Text,
   useToast,
 } from "@chakra-ui/react";
 import { useEffect, useState, useRef } from "react";
@@ -19,6 +20,7 @@ import {
   getAllRecitations,
   getChapterVerses,
   getSurahAudio,
+  getVersesByChapter,
 } from "../../../helpers/api";
 import { useAtom } from "jotai";
 import { activeAudioDataState } from "../../../states/states";
@@ -35,6 +37,7 @@ import ReactAudioPlayer from "react-audio-player";
 import { MdNavigateNext, MdNavigateBefore, MdGraphicEq } from "react-icons/md";
 import { AllRecitations } from "../../../types/AllRecitations";
 import { TbPlayerTrackNext, TbPlayerTrackPrev } from "react-icons/tb";
+import { GetVersesByChapter } from "../../../types/GetVersesByChapter";
 
 function ViewChapter() {
   const toast = useToast();
@@ -48,6 +51,7 @@ function ViewChapter() {
   const [audioVolume, setAudioVolume] = useState(1);
   const [playerPercentage, setPlayerPercentage] = useState(0);
   const [reciterId, setReciterId] = useState(5);
+  const [versesByChapter, setVersesByChapter] = useState<GetVersesByChapter>();
 
   const onModalClose = () => {
     setActiveAudioState(null);
@@ -80,15 +84,27 @@ function ViewChapter() {
         }),
         getChapterVerses({ chapterNo: activeAudioState?.chapterNo }),
         getAllRecitations(),
+        getVersesByChapter({
+          chapterNo: activeAudioState?.chapterNo,
+          recitationId: reciterId,
+        }),
       ])
-        .then(([recitationForChapter, chapterVerses, allRecitations]) => {
-          setActiveAudioState({
-            chapterNo: activeAudioState?.chapterNo,
-            expandedPlayer: activeAudioState.expandedPlayer,
-          });
-          setRecitationForChapter(recitationForChapter);
-          setAllRecitations(allRecitations);
-        })
+        .then(
+          ([
+            recitationForChapter,
+            chapterVerses,
+            allRecitations,
+            versesByChapter,
+          ]) => {
+            setActiveAudioState({
+              chapterNo: activeAudioState?.chapterNo,
+              expandedPlayer: activeAudioState.expandedPlayer,
+            });
+            setRecitationForChapter(recitationForChapter);
+            setAllRecitations(allRecitations);
+            setVersesByChapter(versesByChapter);
+          }
+        )
         .catch((err) => {
           toast({
             title: "Ooops!",
@@ -110,6 +126,7 @@ function ViewChapter() {
     <>
       {typeof activeAudioState?.chapterNo === "number" && (
         <Box
+          overflowY={activeAudioState.expandedPlayer ? "scroll" : "hidden"}
           h={activeAudioState?.expandedPlayer ? "full" : { base: 52, md: 40 }}
           w={
             activeAudioState?.expandedPlayer
@@ -167,16 +184,36 @@ function ViewChapter() {
           </Flex>
 
           <Collapse animateOpacity in={activeAudioState?.expandedPlayer}>
-            {/* <Box
-              as="canvas"
-              w="full"
-              m="auto"
-              h={400}
-              id="recitation-visulization-canvas"
-            /> */}
+            <Box p={4}>
+              {versesByChapter?.verses.map((verse, indx) => (
+                <Box my={7}>
+                  <Text
+                    align="center"
+                    className="font-amiri"
+                    fontSize="xl"
+                    mb={1.5}
+                  >
+                    {verse.text_uthmani}
+                  </Text>
+                  <Text align="center">
+                    {verse.translations[0].text.replace(/<\/?[^>]+(>|$)/g, "")}
+                  </Text>
+                </Box>
+              ))}
+            </Box>
           </Collapse>
 
-          <Box py={5}>
+          <Box
+            rounded={activeAudioState.expandedPlayer ? "xl" : "base"}
+            shadow={activeAudioState.expandedPlayer ? "lg" : "base"}
+            bgColor={
+              activeAudioState.expandedPlayer ? "#083626" : "transparent"
+            }
+            py={5}
+            px={activeAudioState.expandedPlayer ? 5 : 0}
+            bottom={activeAudioState.expandedPlayer ? 5 : 0}
+            pos={activeAudioState.expandedPlayer ? "sticky" : "static"}
+          >
             <Slider
               focusThumbOnChange={false}
               size="lg"

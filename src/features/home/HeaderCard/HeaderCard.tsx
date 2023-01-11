@@ -75,7 +75,7 @@ function HeaderCard() {
       }}
     >
       <Skeleton
-        shadow={isScrolled ? "dark-lg" : "base"}
+        shadow={isScrolled ? "lg" : "base"}
         pos="relative"
         startColor="green.400"
         endColor="green.900"
