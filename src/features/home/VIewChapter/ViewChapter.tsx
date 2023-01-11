@@ -216,6 +216,16 @@ function ViewChapter() {
               crossOrigin="anonymous"
               onPlay={() => setIsAudioPlaying(true)}
               onPause={() => setIsAudioPlaying(false)}
+              onError={(e) => {
+                toast({
+                  title: "Ooops!",
+                  status: "error",
+                  isClosable: true,
+                  duration: 12 * 1000,
+                  description: `We are unable to play the audio. Please try again later.`,
+                  position: "bottom-left",
+                });
+              }}
             />
 
             <Flex
