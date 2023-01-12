@@ -259,7 +259,10 @@ function ViewChapter() {
                       indx
                     ) => (
                       <ScrollIntoViewIfNeeded
-                        active={no === currentVerseNo}
+                        active={
+                          no === currentVerseNo &&
+                          activeAudioState.expandedPlayer
+                        }
                         options={{ scrollMode: "always", behavior: "smooth" }}
                       >
                         <Box my={14} key={indx}>
