@@ -2,6 +2,7 @@ import { QuranApiInstance } from "../constants/api";
 import { AllRecitations } from "../types/AllRecitations";
 import { ChapterRecitations } from "../types/ChapterRecitations";
 import { ChapterVerses } from "../types/ChapterVerses";
+import { GetVersesByChapter } from "../types/GetVersesByChapter";
 import { QuranChapter } from "../types/QuranChapter";
 import { SurahAudio } from "../types/SurahAudio";
 
@@ -76,6 +77,28 @@ export function getChapter(chapterId:number): Promise<QuranChapter> {
     QuranApiInstance.get(`/chapters/${chapterId}?language=en`)
       .then(response => {
         resolve(response.data.chapter);
+      })
+      .catch(reject);
+  });
+}
+
+export function getVersesByChapter({
+  recitationId,
+  chapterNo,
+  translationIds = [131],
+  page = 1,
+  perPage = 10,
+}: {
+  recitationId: number;
+  chapterNo: number;
+  translationIds?: number[];
+  page?: number;
+  perPage?: number;
+}): Promise<GetVersesByChapter> {
+  return new Promise((resolve, reject) => {
+    QuranApiInstance.get(`/verses/by_chapter/${chapterNo}?language=en&words=false&translations=${translationIds.join(",")}&audio=${recitationId}&fields=text_uthmani&page=${page}&per_page=${perPage}`)
+      .then(response => {
+        resolve(response.data);
       })
       .catch(reject);
   });

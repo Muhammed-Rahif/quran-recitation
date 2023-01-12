@@ -3027,6 +3027,14 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-scroll-into-view-if-needed@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@types/react-scroll-into-view-if-needed/-/react-scroll-into-view-if-needed-2.1.1.tgz#2e684c4d5e0a63a566383a54a16fc9bd2cf32852"
+  integrity sha512-aphcrlvAqeUTTh0gVa77lxVT7E04egwcy0/DglytyqjDzGKOTBqrl6B9z2JXySPWbi0d5ZVbttP1+ZCzB74Q0A==
+  dependencies:
+    "@types/react" "*"
+    scroll-into-view-if-needed "*"
+
 "@types/react@*", "@types/react@^18.0.0":
   version "18.0.26"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.26.tgz#8ad59fc01fef8eaf5c74f4ea392621749f0b7917"
@@ -4240,6 +4248,11 @@ compute-scroll-into-view@1.0.14:
   version "1.0.14"
   resolved "https://registry.yarnpkg.com/compute-scroll-into-view/-/compute-scroll-into-view-1.0.14.tgz#80e3ebb25d6aa89f42e533956cb4b16a04cfe759"
   integrity sha512-mKDjINe3tc6hGelUMNDzuhorIUZ7kS7BwyY0r2wQd2HOH2tRuJykiC06iSEX8y1TuhNzvz4GcJnK16mM2J1NMQ==
+
+compute-scroll-into-view@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/compute-scroll-into-view/-/compute-scroll-into-view-2.0.4.tgz#2b444b2b9e4724819d2531efacb7ac094155fdf6"
+  integrity sha512-y/ZA3BGnxoM/QHHQ2Uy49CLtnWPbt4tTPpEEZiEmmiWBFKjej7nEyH8Ryz54jH0MLXflUYA3Er2zUxPSJu5R+g==
 
 concat-map@0.0.1:
   version "0.0.1"
@@ -8801,6 +8814,11 @@ react-scripts@5.0.1:
   optionalDependencies:
     fsevents "^2.3.2"
 
+react-scroll-into-view-if-needed@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/react-scroll-into-view-if-needed/-/react-scroll-into-view-if-needed-3.0.1.tgz#9de6b42408eef91723ae87651cfca9dbba083895"
+  integrity sha512-kMar+uWH9ftsUUA8JTKwGyui5NP1EfAkt/UoodVEsDO81pnWkc8mAN5gLiyVCGmVSHpTQsEcTdqy5rNBUJyUWg==
+
 react-style-singleton@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/react-style-singleton/-/react-style-singleton-2.2.1.tgz#f99e420492b2d8f34d38308ff660b60d0b1205b4"
@@ -9150,6 +9168,13 @@ schema-utils@^4.0.0:
     ajv "^8.8.0"
     ajv-formats "^2.1.1"
     ajv-keywords "^5.0.0"
+
+scroll-into-view-if-needed@*:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/scroll-into-view-if-needed/-/scroll-into-view-if-needed-3.0.4.tgz#4b3101712f0ac8ec982c0a7ab4d071e393241e21"
+  integrity sha512-s+/F50jwTOUt+u5oEIAzum9MN2lUQNvWBe/zfEsVQcbaERjGkKLq1s+2wCHkahMLC8nMLbzMVKivx9JhunXaZg==
+  dependencies:
+    compute-scroll-into-view "^2.0.4"
 
 select-hose@^2.0.0:
   version "2.0.0"

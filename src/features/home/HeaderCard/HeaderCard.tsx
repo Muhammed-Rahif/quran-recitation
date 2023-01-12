@@ -75,7 +75,7 @@ function HeaderCard() {
       }}
     >
       <Skeleton
-        shadow={isScrolled ? "dark-lg" : "base"}
+        shadow={isScrolled ? "lg" : "base"}
         pos="relative"
         startColor="green.400"
         endColor="green.900"
@@ -121,7 +121,10 @@ function HeaderCard() {
             </Box>
 
             <Collapse in={!isScrolled} animateOpacity>
-              <Text fontSize="sm">{lastReadChapter?.name_complex}</Text>
+              <Text fontSize="sm">
+                {lastReadChapter?.name_complex} - Surah No:{" "}
+                {lastReadChapter?.id}
+              </Text>
               {/* Ayah No: 7*/}
             </Collapse>
           </CardBody>
