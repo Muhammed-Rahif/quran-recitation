@@ -42,6 +42,10 @@ body {
   display: none;
 }
 
+.ayahs-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
 #wavesurfer-wrapper > *::-webkit-scrollbar {
   display: none;
 }

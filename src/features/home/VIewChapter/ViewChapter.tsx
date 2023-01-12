@@ -38,6 +38,8 @@ import { MdNavigateNext, MdNavigateBefore, MdGraphicEq } from "react-icons/md";
 import { AllRecitations } from "../../../types/AllRecitations";
 import { TbPlayerTrackNext, TbPlayerTrackPrev } from "react-icons/tb";
 import { GetVersesByChapter } from "../../../types/GetVersesByChapter";
+import { isNamedExports } from "typescript";
+import { VERSUS_BASE_URL } from "../../../constants/api";
 
 function ViewChapter() {
   const toast = useToast();
@@ -87,6 +89,7 @@ function ViewChapter() {
         getVersesByChapter({
           chapterNo: activeAudioState?.chapterNo,
           recitationId: reciterId,
+          perPage: 286,
         }),
       ])
         .then(
@@ -126,7 +129,7 @@ function ViewChapter() {
     <>
       {typeof activeAudioState?.chapterNo === "number" && (
         <Box
-          overflowY={activeAudioState.expandedPlayer ? "scroll" : "hidden"}
+          // overflowY={activeAudioState.expandedPlayer ? "scroll" : "hidden"}
           h={activeAudioState?.expandedPlayer ? "full" : { base: 52, md: 40 }}
           w={
             activeAudioState?.expandedPlayer
@@ -184,14 +187,21 @@ function ViewChapter() {
           </Flex>
 
           <Collapse animateOpacity in={activeAudioState?.expandedPlayer}>
-            <Box p={4}>
+            <Box
+              h="100vh"
+              px={4}
+              py={56}
+              overflowY="scroll"
+              className="ayahs-wrapper"
+            >
               {versesByChapter?.verses.map((verse, indx) => (
-                <Box my={7}>
+                <Box my={7} key={indx}>
                   <Text
                     align="center"
                     className="font-amiri"
                     fontSize="xl"
                     mb={1.5}
+                    lineHeight="10"
                   >
                     {verse.text_uthmani}
                   </Text>
@@ -205,7 +215,7 @@ function ViewChapter() {
 
           <Box
             rounded={activeAudioState.expandedPlayer ? "xl" : "base"}
-            shadow={activeAudioState.expandedPlayer ? "lg" : "base"}
+            shadow={activeAudioState.expandedPlayer ? "lg" : "none"}
             bgColor={
               activeAudioState.expandedPlayer ? "#083626" : "transparent"
             }
@@ -234,7 +244,7 @@ function ViewChapter() {
             </Slider>
 
             <ReactAudioPlayer
-              src={recitationForChapter?.audio_file.audio_url}
+              src={VERSUS_BASE_URL + versesByChapter?.verses[0].audio.url}
               autoPlay
               listenInterval={50}
               onListen={() => {
