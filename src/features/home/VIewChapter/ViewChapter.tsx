@@ -1,17 +1,22 @@
 import {
   Box,
+  Center,
   Circle,
   Collapse,
   Divider,
   Flex,
   HStack,
   IconButton,
+  Progress,
   Select,
+  Skeleton,
+  SkeletonText,
   Slider,
   SliderFilledTrack,
   SliderThumb,
   SliderTrack,
   Spacer,
+  Spinner,
   Text,
   useToast,
 } from "@chakra-ui/react";
@@ -60,6 +65,7 @@ function ViewChapter() {
   const [currentVerseNo, setCurrentVerseNo] = useState(1);
   const [versesByChapter, setVersesByChapter] = useState<GetVersesByChapter>();
   const [chapterInfo, setChapterInfo] = useState<QuranChapter>();
+  const [isLoading, setIsLoading] = useState(false);
 
   const onModalClose = () => {
     setActiveAudioState(null);
@@ -102,6 +108,7 @@ function ViewChapter() {
 
   useEffect(() => {
     setCurrentVerseNo(1);
+    setIsLoading(true);
     if (typeof activeAudioState?.chapterNo === "number")
       Promise.all([
         getSurahAudio({
@@ -133,6 +140,7 @@ function ViewChapter() {
             setAllRecitations(allRecitations);
             setVersesByChapter(versesByChapter);
             setChapterInfo(chapterInfo);
+            setIsLoading(false);
           }
         )
         .catch((err) => {
@@ -239,48 +247,66 @@ function ViewChapter() {
               overflowY="scroll"
               className="ayahs-wrapper"
             >
-              {versesByChapter?.verses.map(
-                ({ text_uthmani, translations, verse_number: no }, indx) => (
-                  <ScrollIntoViewIfNeeded
-                    active={no === currentVerseNo}
-                    options={{ scrollMode: "always", behavior: "smooth" }}
-                  >
-                    <Box my={14} key={indx}>
-                      <Text
-                        align="center"
-                        className="font-me-quran"
-                        fontSize={no === currentVerseNo ? "2xl" : "xl"}
-                        mb={1.5}
-                        lineHeight="10"
-                        lang="ar"
-                        transition="all 750ms"
-                        fontWeight={no === currentVerseNo ? "medium" : "normal"}
+              {isLoading ? (
+                <Center>
+                  <Spinner size="xl" />
+                </Center>
+              ) : (
+                <>
+                  {versesByChapter?.verses.map(
+                    (
+                      { text_uthmani, translations, verse_number: no },
+                      indx
+                    ) => (
+                      <ScrollIntoViewIfNeeded
+                        active={no === currentVerseNo}
+                        options={{ scrollMode: "always", behavior: "smooth" }}
                       >
-                        <Text
-                          align="left"
-                          display="inline-block"
-                          className="font-me-quran"
-                          mx={1.5}
-                          as="span"
-                          lang="ar"
-                        >
-                          {/* {`﴾${toArb(no)}﴿`} */}
-                          {/* &#xFD3E; */}﴾{toArb(no)}﴿{/* &#xFD3F; */}
-                        </Text>
-                        {text_uthmani}
-                      </Text>
-                      <Text
-                        transition="all 750ms"
-                        align="center"
-                        fontSize={no === currentVerseNo ? "lg" : "md"}
-                        fontWeight={no === currentVerseNo ? "medium" : "normal"}
-                        mt={2}
-                      >
-                        {translations[0].text.replace(/<\/?[^>]+(>|$)/g, "")}
-                      </Text>
-                    </Box>
-                  </ScrollIntoViewIfNeeded>
-                )
+                        <Box my={14} key={indx}>
+                          <Text
+                            align="center"
+                            className="font-me-quran"
+                            fontSize={no === currentVerseNo ? "2xl" : "xl"}
+                            mb={1.5}
+                            lineHeight="10"
+                            lang="ar"
+                            transition="all 750ms"
+                            fontWeight={
+                              no === currentVerseNo ? "medium" : "normal"
+                            }
+                          >
+                            <Text
+                              align="left"
+                              display="inline-block"
+                              className="font-me-quran"
+                              mx={1.5}
+                              as="span"
+                              lang="ar"
+                            >
+                              {/* {`﴾${toArb(no)}﴿`} */}
+                              {/* &#xFD3E; */}﴾{toArb(no)}﴿{/* &#xFD3F; */}
+                            </Text>
+                            {text_uthmani}
+                          </Text>
+                          <Text
+                            transition="all 750ms"
+                            align="center"
+                            fontSize={no === currentVerseNo ? "lg" : "md"}
+                            fontWeight={
+                              no === currentVerseNo ? "medium" : "normal"
+                            }
+                            mt={2}
+                          >
+                            {translations[0].text.replace(
+                              /<\/?[^>]+(>|$)/g,
+                              ""
+                            )}
+                          </Text>
+                        </Box>
+                      </ScrollIntoViewIfNeeded>
+                    )
+                  )}
+                </>
               )}
             </Box>
           </Collapse>
@@ -314,10 +340,14 @@ function ViewChapter() {
                 <Box color="green.600" as={MdGraphicEq} />
               </SliderThumb>
             </Slider> */}
-            <Text align="center" fontWeight="semibold">
-              Surah {chapterInfo?.name_simple} : Ayah {currentVerseNo}
-            </Text>
-            <Divider w={32} mx="auto" />
+            {isLoading ? (
+              <Progress size="xs" isIndeterminate />
+            ) : (
+              <Text align="center" fontWeight="semibold">
+                Surah {chapterInfo?.name_simple} : Ayah {currentVerseNo}
+              </Text>
+            )}
+            {!isLoading && <Divider w={32} mx="auto" />}
 
             <ReactAudioPlayer
               src={getAudioSrcForVerse(
@@ -395,6 +425,7 @@ function ViewChapter() {
                   borderRadius="full"
                   colorScheme="gray"
                   onClick={onPrevChapter}
+                  isLoading={isLoading}
                 >
                   <TbPlayerTrackPrev />
                 </IconButton>
@@ -404,6 +435,7 @@ function ViewChapter() {
                   borderRadius="full"
                   colorScheme="gray"
                   onClick={onPrevVerse}
+                  isLoading={isLoading}
                 >
                   <MdNavigateBefore />
                 </IconButton>
@@ -417,6 +449,7 @@ function ViewChapter() {
                     isAudioPlaying ? audio?.pause() : audio?.play();
                   }}
                   isRound
+                  isLoading={isLoading}
                 >
                   {isAudioPlaying ? (
                     <BsPauseFill size="26" />
@@ -430,6 +463,7 @@ function ViewChapter() {
                   borderRadius="full"
                   colorScheme="gray"
                   onClick={onNextVerse}
+                  isLoading={isLoading}
                 >
                   <MdNavigateNext />
                 </IconButton>
@@ -439,6 +473,7 @@ function ViewChapter() {
                   borderRadius="full"
                   colorScheme="gray"
                   onClick={onNextChapter}
+                  isLoading={isLoading}
                 >
                   <TbPlayerTrackNext />
                 </IconButton>
