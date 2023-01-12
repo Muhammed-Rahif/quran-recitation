@@ -2,6 +2,7 @@ import {
   Box,
   Circle,
   Collapse,
+  Divider,
   Flex,
   HStack,
   IconButton,
@@ -11,14 +12,17 @@ import {
   SliderThumb,
   SliderTrack,
   Spacer,
+  Text,
   useToast,
 } from "@chakra-ui/react";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getAllRecitations,
+  getChapter,
   getChapterVerses,
   getSurahAudio,
+  getVersesByChapter,
 } from "../../../helpers/api";
 import { useAtom } from "jotai";
 import { activeAudioDataState } from "../../../states/states";
@@ -35,6 +39,11 @@ import ReactAudioPlayer from "react-audio-player";
 import { MdNavigateNext, MdNavigateBefore, MdGraphicEq } from "react-icons/md";
 import { AllRecitations } from "../../../types/AllRecitations";
 import { TbPlayerTrackNext, TbPlayerTrackPrev } from "react-icons/tb";
+import { GetVersesByChapter } from "../../../types/GetVersesByChapter";
+import { VERSUS_BASE_URL } from "../../../constants/api";
+import { numsToArabicNums as toArb } from "../../../helpers/helpers";
+import { QuranChapter } from "../../../types/QuranChapter";
+import ScrollIntoViewIfNeeded from "react-scroll-into-view-if-needed";
 
 function ViewChapter() {
   const toast = useToast();
@@ -48,6 +57,9 @@ function ViewChapter() {
   const [audioVolume, setAudioVolume] = useState(1);
   const [playerPercentage, setPlayerPercentage] = useState(0);
   const [reciterId, setReciterId] = useState(5);
+  const [currentVerseNo, setCurrentVerseNo] = useState(1);
+  const [versesByChapter, setVersesByChapter] = useState<GetVersesByChapter>();
+  const [chapterInfo, setChapterInfo] = useState<QuranChapter>();
 
   const onModalClose = () => {
     setActiveAudioState(null);
@@ -71,7 +83,25 @@ function ViewChapter() {
       });
   };
 
+  const onNextVerse = () => {
+    if (currentVerseNo === versesByChapter?.pagination.total_records) {
+      // setActiveAudioState({
+      //   ...activeAudioState,
+      //   chapterNo: undefined,
+      //   expandedPlayer: false,
+      // });
+      return;
+    }
+    setCurrentVerseNo(currentVerseNo + 1);
+  };
+
+  const onPrevVerse = () => {
+    if (currentVerseNo <= 1) return;
+    setCurrentVerseNo(currentVerseNo - 1);
+  };
+
   useEffect(() => {
+    setCurrentVerseNo(1);
     if (typeof activeAudioState?.chapterNo === "number")
       Promise.all([
         getSurahAudio({
@@ -80,15 +110,31 @@ function ViewChapter() {
         }),
         getChapterVerses({ chapterNo: activeAudioState?.chapterNo }),
         getAllRecitations(),
+        getVersesByChapter({
+          chapterNo: activeAudioState?.chapterNo,
+          recitationId: reciterId,
+          perPage: 286, // max verses in a chapter (Surah Baqarah)
+        }),
+        getChapter(activeAudioState.chapterNo),
       ])
-        .then(([recitationForChapter, chapterVerses, allRecitations]) => {
-          setActiveAudioState({
-            chapterNo: activeAudioState?.chapterNo,
-            expandedPlayer: activeAudioState.expandedPlayer,
-          });
-          setRecitationForChapter(recitationForChapter);
-          setAllRecitations(allRecitations);
-        })
+        .then(
+          ([
+            recitationForChapter,
+            chapterVerses,
+            allRecitations,
+            versesByChapter,
+            chapterInfo,
+          ]) => {
+            setActiveAudioState({
+              chapterNo: activeAudioState?.chapterNo,
+              expandedPlayer: activeAudioState.expandedPlayer,
+            });
+            setRecitationForChapter(recitationForChapter);
+            setAllRecitations(allRecitations);
+            setVersesByChapter(versesByChapter);
+            setChapterInfo(chapterInfo);
+          }
+        )
         .catch((err) => {
           toast({
             title: "Ooops!",
@@ -106,10 +152,29 @@ function ViewChapter() {
         });
   }, [activeAudioState?.chapterNo, reciterId]);
 
+  function getAudioSrcForVerse(
+    currentVerseNo: number,
+    chapterNo: number
+  ): string | undefined {
+    const verse = versesByChapter?.verses.filter(
+      (itm) => itm.verse_number === currentVerseNo
+    )[0];
+    if (verse) return VERSUS_BASE_URL + verse.audio.url;
+    // else
+    //   toast({
+    //     title: "Ooops!",
+    //     status: "error",
+    //     isClosable: false,
+    //     description: `Error:- can't find verse ${currentVerseNo} in chapter ${chapterNo}`,
+    //     position: "bottom-left",
+    //   });
+  }
+
   return (
     <>
       {typeof activeAudioState?.chapterNo === "number" && (
         <Box
+          // overflowY={activeAudioState.expandedPlayer ? "scroll" : "hidden"}
           h={activeAudioState?.expandedPlayer ? "full" : { base: 52, md: 40 }}
           w={
             activeAudioState?.expandedPlayer
@@ -167,17 +232,71 @@ function ViewChapter() {
           </Flex>
 
           <Collapse animateOpacity in={activeAudioState?.expandedPlayer}>
-            {/* <Box
-              as="canvas"
-              w="full"
-              m="auto"
-              h={400}
-              id="recitation-visulization-canvas"
-            /> */}
+            <Box
+              h="100vh"
+              px={4}
+              py={56}
+              overflowY="scroll"
+              className="ayahs-wrapper"
+            >
+              {versesByChapter?.verses.map(
+                ({ text_uthmani, translations, verse_number: no }, indx) => (
+                  <ScrollIntoViewIfNeeded
+                    active={no === currentVerseNo}
+                    options={{ scrollMode: "always", behavior: "smooth" }}
+                  >
+                    <Box my={14} key={indx}>
+                      <Text
+                        align="center"
+                        className="font-me-quran"
+                        fontSize={no === currentVerseNo ? "2xl" : "xl"}
+                        mb={1.5}
+                        lineHeight="10"
+                        lang="ar"
+                        transition="all 750ms"
+                        fontWeight={no === currentVerseNo ? "medium" : "normal"}
+                      >
+                        <Text
+                          align="left"
+                          display="inline-block"
+                          className="font-me-quran"
+                          mx={1.5}
+                          as="span"
+                          lang="ar"
+                        >
+                          {/* {`﴾${toArb(no)}﴿`} */}
+                          {/* &#xFD3E; */}﴾{toArb(no)}﴿{/* &#xFD3F; */}
+                        </Text>
+                        {text_uthmani}
+                      </Text>
+                      <Text
+                        transition="all 750ms"
+                        align="center"
+                        fontSize={no === currentVerseNo ? "lg" : "md"}
+                        fontWeight={no === currentVerseNo ? "medium" : "normal"}
+                        mt={2}
+                      >
+                        {translations[0].text.replace(/<\/?[^>]+(>|$)/g, "")}
+                      </Text>
+                    </Box>
+                  </ScrollIntoViewIfNeeded>
+                )
+              )}
+            </Box>
           </Collapse>
 
-          <Box py={5}>
-            <Slider
+          <Box
+            rounded={activeAudioState.expandedPlayer ? "xl" : "base"}
+            shadow={activeAudioState.expandedPlayer ? "lg" : "none"}
+            bgColor={
+              activeAudioState.expandedPlayer ? "#083626" : "transparent"
+            }
+            py={5}
+            px={activeAudioState.expandedPlayer ? 5 : 0}
+            bottom={activeAudioState.expandedPlayer ? 5 : 0}
+            pos={activeAudioState.expandedPlayer ? "sticky" : "static"}
+          >
+            {/* <Slider
               focusThumbOnChange={false}
               size="lg"
               value={playerPercentage}
@@ -194,10 +313,18 @@ function ViewChapter() {
               <SliderThumb boxSize={3}>
                 <Box color="green.600" as={MdGraphicEq} />
               </SliderThumb>
-            </Slider>
+            </Slider> */}
+            <Text align="center" fontWeight="semibold">
+              Surah {chapterInfo?.name_simple} : Ayah {currentVerseNo}
+            </Text>
+            <Divider w={32} mx="auto" />
 
             <ReactAudioPlayer
-              src={recitationForChapter?.audio_file.audio_url}
+              src={getAudioSrcForVerse(
+                currentVerseNo,
+                activeAudioState.chapterNo
+              )}
+              onEnded={onNextVerse}
               autoPlay
               listenInterval={50}
               onListen={() => {
@@ -216,6 +343,16 @@ function ViewChapter() {
               crossOrigin="anonymous"
               onPlay={() => setIsAudioPlaying(true)}
               onPause={() => setIsAudioPlaying(false)}
+              onError={(e) => {
+                toast({
+                  title: "Ooops!",
+                  status: "error",
+                  isClosable: true,
+                  duration: 12 * 1000,
+                  description: `We are unable to play the audio. Please try again later.`,
+                  position: "bottom-left",
+                });
+              }}
             />
 
             <Flex
@@ -266,11 +403,7 @@ function ViewChapter() {
                   aria-label="next-button"
                   borderRadius="full"
                   colorScheme="gray"
-                  onClick={() => {
-                    const audio = audioPlayerRef.current?.audioEl.current;
-                    if (!audio) return;
-                    audio.currentTime += 5;
-                  }}
+                  onClick={onPrevVerse}
                 >
                   <MdNavigateBefore />
                 </IconButton>
@@ -296,11 +429,7 @@ function ViewChapter() {
                   aria-label="next-button"
                   borderRadius="full"
                   colorScheme="gray"
-                  onClick={() => {
-                    const audio = audioPlayerRef.current?.audioEl.current;
-                    if (!audio) return;
-                    audio.currentTime += 5;
-                  }}
+                  onClick={onNextVerse}
                 >
                   <MdNavigateNext />
                 </IconButton>
