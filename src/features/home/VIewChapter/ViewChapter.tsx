@@ -344,13 +344,26 @@ function ViewChapter() {
               </SliderThumb>
             </Slider> */}
             {isLoading ? (
-              <Progress size="xs" isIndeterminate />
+              <Progress
+                size="xs"
+                w={{ base: 32, md: "68%" }}
+                my={4}
+                mx="auto"
+                isIndeterminate
+              />
             ) : (
               <Text align="center" fontWeight="semibold">
                 Surah {chapterInfo?.name_simple} : Ayah {currentVerseNo}
               </Text>
             )}
-            {!isLoading && <Divider w={32} mx="auto" />}
+            {!isLoading && (
+              <Divider
+                w={{ base: 32, md: "68%" }}
+                mt={1}
+                mb={{ base: 2, md: 3 }}
+                mx="auto"
+              />
+            )}
 
             <ReactAudioPlayer
               src={getAudioSrcForVerse(
