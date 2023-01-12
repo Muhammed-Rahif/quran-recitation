@@ -20,6 +20,11 @@ body {
   src: local("Kahlil"), url(../public/fonts/kahlil-font.ttf) format("truetype");
 }
 
+@font-face {
+  font-family: "me-quran";
+  src: local("me-quran"), url(../public/fonts/me-quran.ttf) format("truetype");
+}
+
 .font-kahlil {
   font-family: "Kahlil", sans-serif !important;
 }
@@ -30,6 +35,10 @@ body {
 
 .font-amiri {
   font-family: "Amiri", serif !important;
+}
+
+.font-me-quran {
+  font-family: "me-quran", sans-serif !important;
 }
 
 #wavesurfer-wrapper > wave {
