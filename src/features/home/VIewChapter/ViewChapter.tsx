@@ -44,7 +44,6 @@ import { QuranChapter } from "../../../types/QuranChapter";
 import ScrollIntoViewIfNeeded from "react-scroll-into-view-if-needed";
 import { isWebUri } from "valid-url";
 import usePrevious from "../../../hooks/usePrevious";
-import Balancer from "react-wrap-balancer";
 
 function ViewChapter() {
   const toast = useToast();
