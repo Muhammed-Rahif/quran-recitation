@@ -62,14 +62,8 @@ function ViewChapter({ verseNo }: { verseNo?: number }) {
   const [versesByChapter, setVersesByChapter] = useState<GetVersesByChapter>();
   const [chapterInfo, setChapterInfo] = useState<QuranChapter>();
   const [isLoading, setIsLoading] = useState(false);
-  const [, setLocalStore] = useLocalStorage<LocalStoreType>(
-    LOCAL_STORE_KEY,
-    defaultLocalStore
-  );
-
-  useEffect(() => {
-    if (verseNo) setCurrentVerseNo(verseNo);
-  }, [verseNo]);
+  const [{ reciterId: lastReciterId }, setLocalStore] =
+    useLocalStorage<LocalStoreType>(LOCAL_STORE_KEY, defaultLocalStore);
 
   const onModalClose = useCallback(() => {
     setActiveAudioState(null);
@@ -111,6 +105,14 @@ function ViewChapter({ verseNo }: { verseNo?: number }) {
     if (currentVerseNo <= 1) return;
     setCurrentVerseNo(currentVerseNo - 1);
   }, [currentVerseNo]);
+
+  useEffect(() => {
+    setReciterId(lastReciterId);
+  }, [lastReciterId]);
+
+  useEffect(() => {
+    if (verseNo) setCurrentVerseNo(verseNo);
+  }, [verseNo]);
 
   useEffect(() => {
     if (activeAudioState?.chapterNo) {
