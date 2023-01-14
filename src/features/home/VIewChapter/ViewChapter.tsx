@@ -1,23 +1,17 @@
 import {
   Box,
   Center,
-  Circle,
   Collapse,
-  Divider,
   Flex,
+  Heading,
   HStack,
   IconButton,
   Progress,
   Select,
-  Skeleton,
-  SkeletonText,
-  Slider,
-  SliderFilledTrack,
-  SliderThumb,
-  SliderTrack,
   Spacer,
   Spinner,
   Text,
+  Tooltip,
   useToast,
 } from "@chakra-ui/react";
 import { useEffect, useState, useRef } from "react";
@@ -36,12 +30,11 @@ import {
   BsChevronUp,
   BsPlayFill,
   BsPauseFill,
-  BsVolumeUpFill,
 } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { SurahAudio } from "../../../types/SurahAudio";
 import ReactAudioPlayer from "react-audio-player";
-import { MdNavigateNext, MdNavigateBefore, MdGraphicEq } from "react-icons/md";
+import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
 import { AllRecitations } from "../../../types/AllRecitations";
 import { TbPlayerTrackNext, TbPlayerTrackPrev } from "react-icons/tb";
 import { GetVersesByChapter } from "../../../types/GetVersesByChapter";
@@ -49,7 +42,7 @@ import { VERSUS_BASE_URL } from "../../../constants/api";
 import { numsToArabicNums as toArb } from "../../../helpers/helpers";
 import { QuranChapter } from "../../../types/QuranChapter";
 import ScrollIntoViewIfNeeded from "react-scroll-into-view-if-needed";
-import { isUri, isWebUri } from "valid-url";
+import { isWebUri } from "valid-url";
 import usePrevious from "../../../hooks/usePrevious";
 
 function ViewChapter() {
@@ -111,7 +104,7 @@ function ViewChapter() {
 
   useEffect(() => {
     if (typeof activeAudioState?.chapterNo !== "number") return;
-    if (prev?.chapterNo != activeAudioState?.chapterNo) setCurrentVerseNo(1);
+    if (prev?.chapterNo !== activeAudioState?.chapterNo) setCurrentVerseNo(1);
     setIsLoading(true);
     Promise.all([
       getSurahAudio({
@@ -189,7 +182,9 @@ function ViewChapter() {
       {typeof activeAudioState?.chapterNo === "number" && (
         <Box
           // overflowY={activeAudioState.expandedPlayer ? "scroll" : "hidden"}
-          h={activeAudioState?.expandedPlayer ? "full" : { base: 52, md: 40 }}
+          h={
+            activeAudioState?.expandedPlayer ? "full" : { base: "44", md: "32" }
+          }
           w={
             activeAudioState?.expandedPlayer
               ? "full"
@@ -234,7 +229,31 @@ function ViewChapter() {
                 <BsChevronUp />
               )}
             </IconButton>
-            <Spacer />
+            <Spacer>
+              {isLoading ? (
+                <Progress
+                  size="xs"
+                  w={{ base: 32, md: "68%" }}
+                  my={4}
+                  mx="auto"
+                  isIndeterminate
+                />
+              ) : (
+                <Center>
+                  <Heading
+                    mx="auto"
+                    fontWeight="semibold"
+                    fontSize="lg"
+                    my={{
+                      base: activeAudioState.expandedPlayer ? 2 : 0,
+                      md: 3,
+                    }}
+                  >
+                    Surah {chapterInfo?.name_simple} : Ayah {currentVerseNo}
+                  </Heading>
+                </Center>
+              )}
+            </Spacer>
             <IconButton
               onClick={onModalClose}
               colorScheme="gray"
@@ -326,7 +345,7 @@ function ViewChapter() {
             bgColor={
               activeAudioState.expandedPlayer ? "#083626" : "transparent"
             }
-            py={5}
+            py={activeAudioState.expandedPlayer ? 4 : 2}
             px={activeAudioState.expandedPlayer ? 5 : 0}
             bottom={activeAudioState.expandedPlayer ? 5 : 0}
             pos={activeAudioState.expandedPlayer ? "sticky" : "static"}
@@ -349,27 +368,6 @@ function ViewChapter() {
                 <Box color="green.600" as={MdGraphicEq} />
               </SliderThumb>
             </Slider> */}
-            {isLoading ? (
-              <Progress
-                size="xs"
-                w={{ base: 32, md: "68%" }}
-                my={4}
-                mx="auto"
-                isIndeterminate
-              />
-            ) : (
-              <Text align="center" fontWeight="semibold">
-                Surah {chapterInfo?.name_simple} : Ayah {currentVerseNo}
-              </Text>
-            )}
-            {!isLoading && (
-              <Divider
-                w={{ base: 32, md: "68%" }}
-                mt={1}
-                mb={{ base: 2, md: 3 }}
-                mx="auto"
-              />
-            )}
 
             <ReactAudioPlayer
               src={getAudioSrcForVerse(currentVerseNo)}
@@ -439,96 +437,109 @@ function ViewChapter() {
               </Box> */}
 
               <HStack mx={2} gap={{ base: 1, md: 1, lg: 3.5, xl: 4 }}>
-                <IconButton
-                  aria-label="prev-button"
-                  borderRadius="full"
-                  colorScheme="gray"
-                  onClick={onPrevChapter}
-                  isLoading={isLoading}
-                >
-                  <TbPlayerTrackPrev />
-                </IconButton>
+                <Tooltip openDelay={1000} label="Previous Chapter" hasArrow>
+                  <IconButton
+                    aria-label="prev-button"
+                    borderRadius="full"
+                    colorScheme="gray"
+                    onClick={onPrevChapter}
+                    isLoading={isLoading}
+                  >
+                    <TbPlayerTrackPrev />
+                  </IconButton>
+                </Tooltip>
 
-                <IconButton
-                  aria-label="next-button"
-                  borderRadius="full"
-                  colorScheme="gray"
-                  onClick={onPrevVerse}
-                  isLoading={isLoading}
-                >
-                  <MdNavigateBefore />
-                </IconButton>
+                <Tooltip openDelay={1000} label="Previous Verse" hasArrow>
+                  <IconButton
+                    aria-label="next-button"
+                    borderRadius="full"
+                    colorScheme="gray"
+                    onClick={onPrevVerse}
+                    isLoading={isLoading}
+                  >
+                    <MdNavigateBefore />
+                  </IconButton>
+                </Tooltip>
 
-                <IconButton
-                  aria-label="play-button"
-                  colorScheme="green"
-                  size="lg"
-                  onClick={() => {
-                    const audio = audioPlayerRef.current?.audioEl.current;
-                    isAudioPlaying ? audio?.pause() : audio?.play();
-                  }}
-                  isRound
-                  isLoading={isLoading}
-                >
-                  {isAudioPlaying ? (
-                    <BsPauseFill size="26" />
-                  ) : (
-                    <BsPlayFill size="26" />
-                  )}
-                </IconButton>
+                <Tooltip openDelay={1000} label="Play" hasArrow>
+                  <IconButton
+                    aria-label="play-button"
+                    colorScheme="green"
+                    size="lg"
+                    onClick={() => {
+                      const audio = audioPlayerRef.current?.audioEl.current;
+                      isAudioPlaying ? audio?.pause() : audio?.play();
+                    }}
+                    isRound
+                    isLoading={isLoading}
+                  >
+                    {isAudioPlaying ? (
+                      <BsPauseFill size="26" />
+                    ) : (
+                      <BsPlayFill size="26" />
+                    )}
+                  </IconButton>
+                </Tooltip>
 
-                <IconButton
-                  aria-label="next-button"
-                  borderRadius="full"
-                  colorScheme="gray"
-                  onClick={onNextVerse}
-                  isLoading={isLoading}
-                >
-                  <MdNavigateNext />
-                </IconButton>
+                <Tooltip openDelay={1000} label="Next Verse" hasArrow>
+                  <IconButton
+                    aria-label="next-button"
+                    borderRadius="full"
+                    colorScheme="gray"
+                    onClick={onNextVerse}
+                    isLoading={isLoading}
+                  >
+                    <MdNavigateNext />
+                  </IconButton>
+                </Tooltip>
 
-                <IconButton
-                  aria-label="next-button"
-                  borderRadius="full"
-                  colorScheme="gray"
-                  onClick={onNextChapter}
-                  isLoading={isLoading}
-                >
-                  <TbPlayerTrackNext />
-                </IconButton>
+                <Tooltip openDelay={1000} label="Next Chapter" hasArrow>
+                  <IconButton
+                    aria-label="next-button"
+                    borderRadius="full"
+                    colorScheme="gray"
+                    onClick={onNextChapter}
+                    isLoading={isLoading}
+                  >
+                    <TbPlayerTrackNext />
+                  </IconButton>
+                </Tooltip>
               </HStack>
 
-              <Select
-                variant="filled"
-                placeholder={(() => {
-                  const currentRecitation = allRecitations?.recitations.filter(
-                    (recite) => recite.id == reciterId
-                  );
+              <Tooltip openDelay={1000} label="Select Reciter" hasArrow>
+                <Select
+                  variant="filled"
+                  placeholder={(() => {
+                    const currentRecitation =
+                      allRecitations?.recitations.filter(
+                        (recite) => recite.id === reciterId
+                      );
 
-                  if (currentRecitation)
-                    return currentRecitation[0].reciter_name;
+                    if (currentRecitation)
+                      return currentRecitation[0].reciter_name;
 
-                  return "Reciter";
-                })()}
-                py={{ base: 2, md: 0 }}
-                w={{
-                  base: activeAudioState.expandedPlayer ? "full" : 72,
-                  md: 60,
-                }}
-                onChange={(e) => setReciterId(parseInt(e.target.value))}
-                defaultValue={reciterId}
-                my={1.5}
-                size={activeAudioState.expandedPlayer ? "md" : "sm"}
-                rounded="lg"
-              >
-                {allRecitations?.recitations.map(
-                  ({ reciter_name, id }, indx) => (
-                    <option value={id} key={indx}>
-                      {reciter_name}
-                    </option>
-                  )
-                )}
-              </Select>
+                    return "Reciter";
+                  })()}
+                  py={{ base: 2, md: 0 }}
+                  w={{
+                    base: activeAudioState.expandedPlayer ? "full" : 72,
+                    md: 60,
+                  }}
+                  onChange={(e) => setReciterId(parseInt(e.target.value))}
+                  defaultValue={reciterId}
+                  my={1.5}
+                  size={activeAudioState.expandedPlayer ? "md" : "sm"}
+                  rounded="lg"
+                >
+                  {allRecitations?.recitations.map(
+                    ({ reciter_name, id }, indx) => (
+                      <option value={id} key={indx}>
+                        {reciter_name}
+                      </option>
+                    )
+                  )}
+                </Select>
+              </Tooltip>
             </Flex>
           </Box>
         </Box>
