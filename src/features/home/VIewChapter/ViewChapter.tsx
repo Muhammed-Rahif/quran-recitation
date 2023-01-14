@@ -58,7 +58,7 @@ function ViewChapter({ verseNo }: { verseNo?: number }) {
   const [audioVolume] = useState(1);
   const [, setPlayerPercentage] = useState(0);
   const [reciterId, setReciterId] = useState(5);
-  const [currentVerseNo, setCurrentVerseNo] = useState(1);
+  const [currentVerseNo, setCurrentVerseNo] = useState(verseNo ?? 1);
   const [versesByChapter, setVersesByChapter] = useState<GetVersesByChapter>();
   const [chapterInfo, setChapterInfo] = useState<QuranChapter>();
   const [isLoading, setIsLoading] = useState(false);
@@ -108,10 +108,12 @@ function ViewChapter({ verseNo }: { verseNo?: number }) {
 
   useEffect(() => {
     setReciterId(lastReciterId);
-  }, [lastReciterId]);
+  }, []);
 
   useEffect(() => {
-    if (verseNo) setCurrentVerseNo(verseNo);
+    console.log(verseNo);
+
+    // if (verseNo) setCurrentVerseNo(verseNo);
   }, [verseNo]);
 
   useEffect(() => {
@@ -125,14 +127,19 @@ function ViewChapter({ verseNo }: { verseNo?: number }) {
   }, [currentVerseNo, activeAudioState?.chapterNo, reciterId, setLocalStore]);
 
   useEffect(() => {
+    console.log(currentVerseNo);
+  }, [currentVerseNo]);
+
+  useEffect(() => {
     if (typeof activeAudioState?.chapterNo !== "number") return;
     setIsLoading(true);
+    setCurrentVerseNo(verseNo ?? 1);
     Promise.all([
       getSurahAudio({
         recitationId: reciterId,
         chapterNo: activeAudioState?.chapterNo,
       }),
-      getChapterVerses({ chapterNo: activeAudioState?.chapterNo }),
+      // getChapterVerses({ chapterNo: activeAudioState?.chapterNo }),
       getAllRecitations(),
       getVersesByChapter({
         chapterNo: activeAudioState?.chapterNo,
@@ -144,7 +151,7 @@ function ViewChapter({ verseNo }: { verseNo?: number }) {
       .then(
         ([
           recitationForChapter,
-          ,
+          // ,
           allRecitations,
           versesByChapter,
           chapterInfo,
