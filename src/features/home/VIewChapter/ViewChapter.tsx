@@ -44,6 +44,7 @@ import { QuranChapter } from "../../../types/QuranChapter";
 import ScrollIntoViewIfNeeded from "react-scroll-into-view-if-needed";
 import { isWebUri } from "valid-url";
 import usePrevious from "../../../hooks/usePrevious";
+import Balancer from "react-wrap-balancer";
 
 function ViewChapter() {
   const toast = useToast();
@@ -213,12 +214,12 @@ function ViewChapter() {
         >
           <Flex>
             <IconButton
-              onClick={() =>
+              onClick={() => {
                 setActiveAudioState({
                   ...activeAudioState,
                   expandedPlayer: !activeAudioState?.expandedPlayer,
-                })
-              }
+                });
+              }}
               colorScheme="gray"
               aria-label={"button"}
               size="xs"
@@ -290,21 +291,18 @@ function ViewChapter() {
                         }
                         options={{ scrollMode: "always", behavior: "smooth" }}
                       >
-                        <Box my={14} key={indx}>
+                        <Box mx="auto" my={14} key={indx} maxW="3xl">
                           <Text
                             align="center"
                             className="font-me-quran"
-                            fontSize={no === currentVerseNo ? "2xl" : "xl"}
+                            fontSize="xl"
                             mb={1.5}
                             lineHeight="10"
                             lang="ar"
                             transition="all 750ms"
-                            fontWeight={
-                              no === currentVerseNo ? "medium" : "normal"
-                            }
                           >
                             <Text
-                              align="left"
+                              align="center"
                               display="inline-block"
                               className="font-me-quran"
                               mx={1.5}
@@ -316,15 +314,7 @@ function ViewChapter() {
                             </Text>
                             {text_uthmani}
                           </Text>
-                          <Text
-                            transition="all 750ms"
-                            align="center"
-                            fontSize={no === currentVerseNo ? "lg" : "md"}
-                            fontWeight={
-                              no === currentVerseNo ? "medium" : "normal"
-                            }
-                            mt={2}
-                          >
+                          <Text transition="all 750ms" align="center" mt={2}>
                             {translations[0].text.replace(
                               /<\/?[^>]+(>|$)/g,
                               ""
