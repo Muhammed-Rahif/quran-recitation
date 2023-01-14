@@ -14,7 +14,7 @@ import {
   Tooltip,
   useToast,
 } from "@chakra-ui/react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getAllRecitations,
@@ -43,49 +43,53 @@ import { numsToArabicNums as toArb } from "../../../helpers/helpers";
 import { QuranChapter } from "../../../types/QuranChapter";
 import ScrollIntoViewIfNeeded from "react-scroll-into-view-if-needed";
 import { isWebUri } from "valid-url";
-import usePrevious from "../../../hooks/usePrevious";
+import useLocalStorage from "use-local-storage";
+import { LocalStoreType } from "../../../types/LocalStoreType";
+import { defaultLocalStore, LOCAL_STORE_KEY } from "../../../constants/store";
 
-function ViewChapter() {
+function ViewChapter({ verseNo }: { verseNo?: number }) {
   const toast = useToast();
   const navigate = useNavigate();
   const [activeAudioState, setActiveAudioState] = useAtom(activeAudioDataState);
-  const [recitationForChapter, setRecitationForChapter] =
-    useState<SurahAudio>();
+  const [, setRecitationForChapter] = useState<SurahAudio>();
   const audioPlayerRef = useRef<ReactAudioPlayer | null>();
   const [allRecitations, setAllRecitations] = useState<AllRecitations>();
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const [audioVolume, setAudioVolume] = useState(1);
-  const [playerPercentage, setPlayerPercentage] = useState(0);
+  const [audioVolume] = useState(1);
+  const [, setPlayerPercentage] = useState(0);
   const [reciterId, setReciterId] = useState(5);
   const [currentVerseNo, setCurrentVerseNo] = useState(1);
   const [versesByChapter, setVersesByChapter] = useState<GetVersesByChapter>();
   const [chapterInfo, setChapterInfo] = useState<QuranChapter>();
   const [isLoading, setIsLoading] = useState(false);
-  const prev = usePrevious({ ...activeAudioState });
+  const [{ reciterId: lastReciterId }, setLocalStore] =
+    useLocalStorage<LocalStoreType>(LOCAL_STORE_KEY, defaultLocalStore);
 
-  const onModalClose = () => {
+  const onModalClose = useCallback(() => {
     setActiveAudioState(null);
-  };
+  }, [setActiveAudioState]);
 
-  const onNextChapter = () => {
+  const onNextChapter = useCallback(() => {
     if (!activeAudioState?.chapterNo) return;
+    setCurrentVerseNo(1);
     if (activeAudioState?.chapterNo >= 1 && activeAudioState?.chapterNo < 114)
       setActiveAudioState({
         ...activeAudioState,
         chapterNo: activeAudioState.chapterNo + 1,
       });
-  };
+  }, [activeAudioState, setActiveAudioState]);
 
-  const onPrevChapter = () => {
+  const onPrevChapter = useCallback(() => {
     if (!activeAudioState?.chapterNo) return;
+    setCurrentVerseNo(1);
     if (activeAudioState?.chapterNo > 1 && activeAudioState?.chapterNo <= 114)
       setActiveAudioState({
         ...activeAudioState,
         chapterNo: activeAudioState.chapterNo - 1,
       });
-  };
+  }, [activeAudioState, setActiveAudioState]);
 
-  const onNextVerse = () => {
+  const onNextVerse = useCallback(() => {
     if (currentVerseNo === versesByChapter?.pagination.total_records) {
       // setActiveAudioState({
       //   ...activeAudioState,
@@ -95,16 +99,33 @@ function ViewChapter() {
       return;
     }
     setCurrentVerseNo(currentVerseNo + 1);
-  };
+  }, [currentVerseNo, versesByChapter?.pagination.total_records]);
 
-  const onPrevVerse = () => {
+  const onPrevVerse = useCallback(() => {
     if (currentVerseNo <= 1) return;
     setCurrentVerseNo(currentVerseNo - 1);
-  };
+  }, [currentVerseNo]);
+
+  useEffect(() => {
+    setReciterId(lastReciterId);
+  }, [lastReciterId]);
+
+  useEffect(() => {
+    if (verseNo) setCurrentVerseNo(verseNo);
+  }, [verseNo]);
+
+  useEffect(() => {
+    if (activeAudioState?.chapterNo) {
+      setLocalStore({
+        reciterId,
+        lastReadChapterNo: activeAudioState.chapterNo,
+        lastReadVerseNo: currentVerseNo,
+      });
+    }
+  }, [currentVerseNo, activeAudioState?.chapterNo, reciterId, setLocalStore]);
 
   useEffect(() => {
     if (typeof activeAudioState?.chapterNo !== "number") return;
-    if (prev?.chapterNo !== activeAudioState?.chapterNo) setCurrentVerseNo(1);
     setIsLoading(true);
     Promise.all([
       getSurahAudio({
@@ -123,7 +144,7 @@ function ViewChapter() {
       .then(
         ([
           recitationForChapter,
-          chapterVerses,
+          ,
           allRecitations,
           versesByChapter,
           chapterInfo,
@@ -156,26 +177,29 @@ function ViewChapter() {
       });
   }, [activeAudioState?.chapterNo, reciterId]);
 
-  function getAudioSrcForVerse(currentVerseNo: number): string | undefined {
-    const verse = versesByChapter?.verses.filter(
-      (itm) => itm.verse_number === currentVerseNo
-    )[0];
-    if (!verse) return;
+  const getAudioSrcForVerse = useCallback(
+    function (currentVerseNo: number): string | undefined {
+      const verse = versesByChapter?.verses.filter(
+        (itm) => itm.verse_number === currentVerseNo
+      )[0];
+      if (!verse) return;
 
-    const audioUrl = verse.audio.url;
+      const audioUrl = verse.audio.url;
 
-    if (isWebUri(audioUrl)) return audioUrl;
+      if (isWebUri(audioUrl)) return audioUrl;
 
-    return VERSUS_BASE_URL + verse.audio.url;
-    // else
-    //   toast({
-    //     title: "Ooops!",
-    //     status: "error",
-    //     isClosable: false,
-    //     description: `Error:- can't find verse ${currentVerseNo} in chapter ${chapterNo}`,
-    //     position: "bottom-left",
-    //   });
-  }
+      return VERSUS_BASE_URL + verse.audio.url;
+      // else
+      //   toast({
+      //     title: "Ooops!",
+      //     status: "error",
+      //     isClosable: false,
+      //     description: `Error:- can't find verse ${currentVerseNo} in chapter ${chapterNo}`,
+      //     position: "bottom-left",
+      //   });
+    },
+    [versesByChapter?.verses]
+  );
 
   return (
     <>
@@ -379,7 +403,7 @@ function ViewChapter() {
               crossOrigin="anonymous"
               onPlay={() => setIsAudioPlaying(true)}
               onPause={() => setIsAudioPlaying(false)}
-              onError={(e) => {
+              onError={() => {
                 toast({
                   title: "Ooops!",
                   status: "error",

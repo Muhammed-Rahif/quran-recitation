@@ -24,6 +24,7 @@ function Home() {
   const [allChapters, setAllChapters] = useState<QuranChapter[]>(
     new Array(INIT_ARR_LENGTH).fill({} as QuranChapter)
   );
+  const [verseNo, setVerseNo] = useState(1);
 
   useEffect(() => {
     getAllChapters()
@@ -45,7 +46,7 @@ function Home() {
 
   return (
     <>
-      <HeaderCard />
+      <HeaderCard onSetVerseNo={setVerseNo} />
 
       <Grid
         templateColumns={{
@@ -72,12 +73,13 @@ function Home() {
               key={index}
               py={allChapters.length === INIT_ARR_LENGTH ? 0 : 3}
               h="auto"
-              onClick={() =>
+              onClick={() => {
+                setVerseNo(1);
                 setActiveAudioState({
                   chapterNo: id,
                   expandedPlayer: activeAudioState?.expandedPlayer ?? true,
-                })
-              }
+                });
+              }}
             >
               <Circle
                 size="34px"
@@ -103,7 +105,7 @@ function Home() {
         )}
       </Grid>
 
-      <ViewChapter />
+      <ViewChapter verseNo={verseNo} />
     </>
   );
 }
