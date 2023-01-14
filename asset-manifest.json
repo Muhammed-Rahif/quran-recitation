@@ -1,18 +1,18 @@
 {
   "files": {
     "main.css": "/quran-recitation/static/css/main.8f43460e.css",
-    "main.js": "/quran-recitation/static/js/main.ccbd4569.js",
+    "main.js": "/quran-recitation/static/js/main.00e59633.js",
     "static/js/787.26d76619.chunk.js": "/quran-recitation/static/js/787.26d76619.chunk.js",
     "static/media/me-quran.ttf": "/quran-recitation/static/media/me-quran.0df26babbd330ac290ae.ttf",
     "service-worker.js": "/quran-recitation/service-worker.js",
     "static/media/kahlil-font.ttf": "/quran-recitation/static/media/kahlil-font.cefd8899a943f089d10b.ttf",
     "index.html": "/quran-recitation/index.html",
     "main.8f43460e.css.map": "/quran-recitation/static/css/main.8f43460e.css.map",
-    "main.ccbd4569.js.map": "/quran-recitation/static/js/main.ccbd4569.js.map",
+    "main.00e59633.js.map": "/quran-recitation/static/js/main.00e59633.js.map",
     "787.26d76619.chunk.js.map": "/quran-recitation/static/js/787.26d76619.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.8f43460e.css",
-    "static/js/main.ccbd4569.js"
+    "static/js/main.00e59633.js"
   ]
 }
