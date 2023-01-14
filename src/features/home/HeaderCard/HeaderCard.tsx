@@ -21,15 +21,19 @@ import { useAtom } from "jotai";
 import { activeAudioDataState } from "../../../states/states";
 import { getChapter } from "../../../helpers/api";
 import { QuranChapter } from "../../../types/QuranChapter";
+import { LocalStoreType } from "../../../types/LocalStoreType";
+import { defaultLocalStore, LOCAL_STORE_KEY } from "../../../constants/store";
 
-function HeaderCard() {
+function HeaderCard({
+  onSetVerseNo,
+}: {
+  onSetVerseNo: (verseNo: number) => void;
+}) {
   const toast = useToast();
   const [lastReadChapter, setLastReadChapter] = useState<QuranChapter>();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [lastReadChapterId, setLastReadChapterId] = useLocalStorage<number>(
-    "last-read-chapter",
-    1
-  );
+  const [{ lastReadChapterNo, lastReadVerseNo }] =
+    useLocalStorage<LocalStoreType>(LOCAL_STORE_KEY, defaultLocalStore);
   const [activeAudioState, setActiveAudioState] = useAtom(activeAudioDataState);
 
   useEffect(() => {
@@ -40,12 +44,7 @@ function HeaderCard() {
   }, []);
 
   useEffect(() => {
-    if (!activeAudioState?.chapterNo) return;
-    setLastReadChapterId(activeAudioState?.chapterNo);
-  }, [activeAudioState?.chapterNo]);
-
-  useEffect(() => {
-    getChapter(lastReadChapterId)
+    getChapter(lastReadChapterNo)
       .then(setLastReadChapter)
       .catch((err) =>
         toast({
@@ -67,11 +66,13 @@ function HeaderCard() {
       borderRadius="2xl"
       zIndex={60}
       onClick={() => {
-        if (lastReadChapterId)
+        if (lastReadChapterNo) {
+          onSetVerseNo(lastReadVerseNo);
           setActiveAudioState({
             ...activeAudioState!,
-            chapterNo: lastReadChapterId,
+            chapterNo: lastReadChapterNo,
           });
+        }
       }}
     >
       <Skeleton
@@ -120,13 +121,11 @@ function HeaderCard() {
               </Collapse>
             </Box>
 
-            <Collapse in={!isScrolled} animateOpacity>
-              <Text fontSize="sm">
-                {lastReadChapter?.name_complex} - Surah No:{" "}
-                {lastReadChapter?.id}
-              </Text>
-              {/* Ayah No: 7*/}
-            </Collapse>
+            {/* <Collapse in={!isScrolled} animateOpacity> */}
+            <Text transition="all 200ms" fontSize={isScrolled ? "xs" : "sm"}>
+              Ayah No: {lastReadVerseNo}
+            </Text>
+            {/* </Collapse> */}
           </CardBody>
 
           <Image
