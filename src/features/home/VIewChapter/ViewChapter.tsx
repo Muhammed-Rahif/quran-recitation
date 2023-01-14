@@ -49,6 +49,8 @@ import { VERSUS_BASE_URL } from "../../../constants/api";
 import { numsToArabicNums as toArb } from "../../../helpers/helpers";
 import { QuranChapter } from "../../../types/QuranChapter";
 import ScrollIntoViewIfNeeded from "react-scroll-into-view-if-needed";
+import { isUri, isWebUri } from "valid-url";
+import usePrevious from "../../../hooks/usePrevious";
 
 function ViewChapter() {
   const toast = useToast();
@@ -66,6 +68,7 @@ function ViewChapter() {
   const [versesByChapter, setVersesByChapter] = useState<GetVersesByChapter>();
   const [chapterInfo, setChapterInfo] = useState<QuranChapter>();
   const [isLoading, setIsLoading] = useState(false);
+  const prev = usePrevious({ ...activeAudioState });
 
   const onModalClose = () => {
     setActiveAudioState(null);
@@ -107,67 +110,70 @@ function ViewChapter() {
   };
 
   useEffect(() => {
-    setCurrentVerseNo(1);
+    if (typeof activeAudioState?.chapterNo !== "number") return;
+    if (prev?.chapterNo != activeAudioState?.chapterNo) setCurrentVerseNo(1);
     setIsLoading(true);
-    if (typeof activeAudioState?.chapterNo === "number")
-      Promise.all([
-        getSurahAudio({
-          recitationId: reciterId,
-          chapterNo: activeAudioState?.chapterNo,
-        }),
-        getChapterVerses({ chapterNo: activeAudioState?.chapterNo }),
-        getAllRecitations(),
-        getVersesByChapter({
-          chapterNo: activeAudioState?.chapterNo,
-          recitationId: reciterId,
-          perPage: 286, // max verses in a chapter (Surah Baqarah)
-        }),
-        getChapter(activeAudioState.chapterNo),
-      ])
-        .then(
-          ([
-            recitationForChapter,
-            chapterVerses,
-            allRecitations,
-            versesByChapter,
-            chapterInfo,
-          ]) => {
-            setActiveAudioState({
-              chapterNo: activeAudioState?.chapterNo,
-              expandedPlayer: activeAudioState.expandedPlayer,
-            });
-            setRecitationForChapter(recitationForChapter);
-            setAllRecitations(allRecitations);
-            setVersesByChapter(versesByChapter);
-            setChapterInfo(chapterInfo);
-            setIsLoading(false);
-          }
-        )
-        .catch((err) => {
-          toast({
-            title: "Ooops!",
-            status: "error",
-            isClosable: false,
-            description: `Error:- ${
-              err.message ? err.message : JSON.stringify(err)
-            }`,
-            position: "bottom-left",
+    Promise.all([
+      getSurahAudio({
+        recitationId: reciterId,
+        chapterNo: activeAudioState?.chapterNo,
+      }),
+      getChapterVerses({ chapterNo: activeAudioState?.chapterNo }),
+      getAllRecitations(),
+      getVersesByChapter({
+        chapterNo: activeAudioState?.chapterNo,
+        recitationId: reciterId,
+        perPage: 286, // max verses in a chapter (Surah Baqarah)
+      }),
+      getChapter(activeAudioState.chapterNo),
+    ])
+      .then(
+        ([
+          recitationForChapter,
+          chapterVerses,
+          allRecitations,
+          versesByChapter,
+          chapterInfo,
+        ]) => {
+          setActiveAudioState({
+            chapterNo: activeAudioState?.chapterNo,
+            expandedPlayer: activeAudioState.expandedPlayer,
           });
-
-          setTimeout(() => {
-            navigate("/quran-recitation");
-          }, 3000);
+          setRecitationForChapter(recitationForChapter);
+          setAllRecitations(allRecitations);
+          setVersesByChapter(versesByChapter);
+          setChapterInfo(chapterInfo);
+          setIsLoading(false);
+        }
+      )
+      .catch((err) => {
+        toast({
+          title: "Ooops!",
+          status: "error",
+          isClosable: false,
+          description: `Error:- ${
+            err.message ? err.message : JSON.stringify(err)
+          }`,
+          position: "bottom-left",
         });
+
+        setTimeout(() => {
+          navigate("/quran-recitation");
+        }, 3000);
+      });
   }, [activeAudioState?.chapterNo, reciterId]);
 
-  function getAudioSrcForVerse(
-    currentVerseNo: number,
-    chapterNo: number
-  ): string | undefined {
+  function getAudioSrcForVerse(currentVerseNo: number): string | undefined {
     const verse = versesByChapter?.verses.filter(
       (itm) => itm.verse_number === currentVerseNo
     )[0];
-    if (verse) return VERSUS_BASE_URL + verse.audio.url;
+    if (!verse) return;
+
+    const audioUrl = verse.audio.url;
+
+    if (isWebUri(audioUrl)) return audioUrl;
+
+    return VERSUS_BASE_URL + verse.audio.url;
     // else
     //   toast({
     //     title: "Ooops!",
@@ -366,10 +372,7 @@ function ViewChapter() {
             )}
 
             <ReactAudioPlayer
-              src={getAudioSrcForVerse(
-                currentVerseNo,
-                activeAudioState.chapterNo
-              )}
+              src={getAudioSrcForVerse(currentVerseNo)}
               onEnded={onNextVerse}
               autoPlay
               listenInterval={50}
