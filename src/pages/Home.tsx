@@ -74,11 +74,11 @@ function Home() {
               py={allChapters.length === INIT_ARR_LENGTH ? 0 : 3}
               h="auto"
               onClick={() => {
-                setVerseNo(1);
                 setActiveAudioState({
                   chapterNo: id,
                   expandedPlayer: activeAudioState?.expandedPlayer ?? true,
                 });
+                setVerseNo(1);
               }}
             >
               <Circle
